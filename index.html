@@ -3,29 +3,51 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dark Pro Document Editor & Viewer</title>
+<title>Ultimate Dark Document Editor & Viewer</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Quill for Text/Word Editor -->
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<!-- PDF.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.8.162/pdf.min.js"></script>
+
+<!-- SheetJS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- Mammoth.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
 
 <style>
 body { background-color: #1e1e2f; color: #f0f0f0; font-family: 'Inter', sans-serif; }
 .editor-container, .pdf-container, .excel-container { height: 400px; overflow: auto; border: 1px solid #444; border-radius: 0.5rem; padding: 0.5rem; margin-top: 1rem; background-color: #2b2b3b; }
-button { background-color: #3b82f6; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; margin-right: 0.5rem; }
+button { background-color: #3b82f6; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; margin-right: 0.5rem; cursor:pointer; transition:0.2s; }
+button:hover { background-color: #2563eb; }
 .tabs button { background-color: #3b3b5c; margin-right: 0.25rem; }
 .tabs button.active { background-color: #3b82f6; }
-.pdf-controls, .excel-controls, .quill-toolbar { margin-top: 0.5rem; }
-.drag-drop { border: 2px dashed #3b82f6; padding: 2rem; border-radius: 0.5rem; text-align: center; cursor: pointer; margin-bottom: 1rem; }
-.ql-toolbar.ql-snow { background-color: #3b3b5c; border: 1px solid #444; color: white; }
+.pdf-controls, .excel-controls { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.drag-drop { border: 2px dashed #3b82f6; padding: 2rem; border-radius: 0.5rem; text-align: center; cursor: pointer; margin-bottom: 1rem; transition:0.2s; }
+.drag-drop:hover { background-color: #3b3b5c; }
+.ql-toolbar.ql-snow { background-color: #3b3b5c; border: 1px solid #444; color: #f0f0f0; }
 .ql-container.ql-snow { background-color: #2b2b3b; color: #f0f0f0; border: 1px solid #444; }
+.ql-picker-label, .ql-picker-item { color:#f0f0f0 !important; }
+.ql-stroke { stroke:#f0f0f0 !important; }
+.ql-fill { fill:#f0f0f0 !important; }
+.excel-container table { width: 100%; border-collapse: collapse; }
+.excel-container td, .excel-container th { border: 1px solid #555; padding: 0.3rem; color: #f0f0f0; background-color: #2b2b3b; }
+.excel-container td:focus { outline: 2px solid #3b82f6; background-color: #3b3b5c; }
+.pdf-wrapper { display:flex; gap:10px; }
+.pdf-thumbnails { width:100px; overflow-y:auto; border:1px solid #444; background:#2b2b3b; padding:5px; border-radius:5px; }
+.pdf-thumbnails canvas { width:100%; cursor:pointer; margin-bottom:5px; border:2px solid #444; border-radius:3px; }
+.pdf-thumbnails canvas.active { border:2px solid #3b82f6; }
+.pdf-viewer { flex:1; }
 </style>
 </head>
 <body class="p-5">
 
-<h1 class="text-2xl mb-4">🗂 Dark Pro Document Editor & Viewer</h1>
+<h1 class="text-2xl mb-4">🗂 Ultimate Dark Document Editor & Viewer</h1>
 
 <!-- Drag and Drop Upload -->
 <div id="dragDrop" class="drag-drop mb-4">
@@ -43,140 +65,170 @@ button { background-color: #3b82f6; color: white; padding: 0.5rem 1rem; border-r
 <!-- Editors/Viewer -->
 <div id="textTab" class="editor-container"></div>
 
-<div>
-  <canvas id="pdfTab" class="pdf-container" style="display:none;"></canvas>
-  <div class="pdf-controls flex flex-wrap gap-2 mt-2">
-    <button id="prevPage">⬅ Prev</button>
-    <span id="pageInfo">1 / 1</span>
-    <button id="nextPage">Next ➡</button>
-    <button id="zoomIn">Zoom +</button>
-    <button id="zoomOut">Zoom -</button>
+<div id="pdfContainer" style="display:none;" class="pdf-wrapper">
+  <div class="pdf-thumbnails" id="pdfThumbnails"></div>
+  <div class="pdf-viewer">
+    <canvas id="pdfTab" class="pdf-container"></canvas>
+    <div class="pdf-controls">
+      <button id="prevPage">⬅ Prev</button>
+      <span id="pageInfo">1 / 1</span>
+      <button id="nextPage">Next ➡</button>
+      <button id="zoomIn">Zoom +</button>
+      <button id="zoomOut">Zoom -</button>
+    </div>
   </div>
 </div>
 
 <div id="excelTab" class="excel-container" style="display:none;"></div>
-<div class="excel-controls flex gap-2 mt-2">
+<div class="excel-controls">
   <button id="addRow">Add Row</button>
   <button id="addCol">Add Column</button>
   <button id="deleteRow">Delete Last Row</button>
   <button id="deleteCol">Delete Last Column</button>
 </div>
 
-<!-- Buttons -->
-<div class="mb-4">
+<!-- Action Buttons -->
+<div class="mb-4 mt-2">
   <button id="downloadBtn">Download</button>
   <button id="printBtn">Print</button>
 </div>
 
 <script>
+// Tab switching
 const tabs = document.querySelectorAll('.tabs button');
-const tabContents = { textTab: document.getElementById('textTab'), pdfTab: document.getElementById('pdfTab'), excelTab: document.getElementById('excelTab') };
-
-// Switch Tabs
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    tabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    for (let key in tabContents) tabContents[key].style.display = 'none';
-    tabContents[tab.dataset.tab].style.display = 'block';
-    if(tab.dataset.tab==='pdfTab') renderPDF();
-  });
-});
+const tabContents = { textTab: document.getElementById('textTab'), pdfTab: document.getElementById('pdfContainer'), excelTab: document.getElementById('excelTab') };
+tabs.forEach(tab => tab.addEventListener('click', () => {
+  tabs.forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  for(let key in tabContents) tabContents[key].style.display='none';
+  tabContents[tab.dataset.tab].style.display='block';
+}));
 
 // Initialize Quill Editor
 const quill = new Quill('#textTab', {
-  theme: 'snow',
-  modules: { toolbar: [['bold','italic','underline'], ['link','image'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], [{ 'align': [] }], ['clean']] }
+  theme:'snow',
+  modules:{ toolbar: [
+    ['bold','italic','underline','strike'],
+    [{ 'font': [] }, { 'size': ['small','normal','large','huge'] }],
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'align': [] }],
+    ['link','image','video'],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    ['clean']
+  ]}
 });
 
 // File Handling
 const fileInput = document.getElementById('fileInput');
 const dragDrop = document.getElementById('dragDrop');
-let currentPDF = null, currentPDFData = null, pdfPageNum = 1, pdfScale = 1.5;
+let currentPDF=null, currentPDFData=null, pdfPageNum=1, pdfScale=1.5;
 
 dragDrop.addEventListener('click', ()=>fileInput.click());
 dragDrop.addEventListener('dragover', (e)=>{ e.preventDefault(); dragDrop.style.backgroundColor='#3b3b5c'; });
 dragDrop.addEventListener('dragleave', ()=>{ dragDrop.style.backgroundColor='#2b2b3b'; });
-dragDrop.addEventListener('drop', (e)=>{
-  e.preventDefault(); dragDrop.style.backgroundColor='#2b2b3b';
-  handleFiles(e.dataTransfer.files);
-});
+dragDrop.addEventListener('drop', (e)=>{ e.preventDefault(); dragDrop.style.backgroundColor='#2b2b3b'; handleFiles(e.dataTransfer.files); });
 fileInput.addEventListener('change', (e)=> handleFiles(e.target.files));
 
 async function handleFiles(files){
-  for (let file of files) {
-    const ext = file.name.split('.').pop().toLowerCase();
-    if(ext === 'pdf') {
-      currentPDFData = await file.arrayBuffer();
-      currentPDF = await pdfjsLib.getDocument({ data: currentPDFData }).promise;
-      pdfPageNum = 1; pdfScale = 1.5; tabs[1].click(); renderPDF();
+  for(let file of files){
+    const ext=file.name.split('.').pop().toLowerCase();
+    if(ext==='pdf'){ 
+      currentPDFData=await file.arrayBuffer(); 
+      currentPDF=await pdfjsLib.getDocument({data:currentPDFData}).promise; 
+      pdfPageNum=1; pdfScale=1.5; 
+      tabs[1].click(); 
+      renderPDF(); renderPDFThumbnails();
     }
-    else if(ext==='docx'||ext==='doc') {
-      const reader = new FileReader();
-      reader.onload = async (event) => { const arrayBuffer = event.target.result; const result = await mammoth.extractRawText({ arrayBuffer }); quill.setText(result.value); tabs[0].click(); }
+    else if(ext==='docx'||ext==='doc'){ 
+      const reader=new FileReader(); 
+      reader.onload=async(e)=>{ 
+        const arrayBuffer=e.target.result; 
+        const result=await mammoth.extractRawText({arrayBuffer}); 
+        quill.setText(result.value); 
+        tabs[0].click(); 
+      }; 
       reader.readAsArrayBuffer(file);
     }
-    else if(ext==='xlsx'||ext==='xls'||ext==='csv') {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      tabContents.excelTab.innerHTML = XLSX.utils.sheet_to_html(firstSheet);
+    else if(ext==='xlsx'||ext==='xls'||ext==='csv'){ 
+      const data=await file.arrayBuffer(); 
+      const workbook=XLSX.read(data); 
+      const firstSheet=workbook.Sheets[workbook.SheetNames[0]]; 
+      tabContents.excelTab.innerHTML=XLSX.utils.sheet_to_html(firstSheet); 
       tabs[2].click();
     }
-    else { const text = await file.text(); quill.setText(text); tabs[0].click(); }
+    else{ 
+      const text=await file.text(); 
+      quill.setText(text); 
+      tabs[0].click();
+    }
   }
 }
 
 // PDF Rendering
-const pdfCanvas = document.getElementById('pdfTab');
-const pdfCtx = pdfCanvas.getContext('2d');
-const pageInfo = document.getElementById('pageInfo');
-async function renderPDF() {
+const pdfCanvas=document.getElementById('pdfTab');
+const pdfCtx=pdfCanvas.getContext('2d');
+const pageInfo=document.getElementById('pageInfo');
+async function renderPDF(){
   if(!currentPDF) return;
-  const page = await currentPDF.getPage(pdfPageNum);
-  const viewport = page.getViewport({ scale: pdfScale });
-  pdfCanvas.height = viewport.height;
-  pdfCanvas.width = viewport.width;
-  await page.render({ canvasContext: pdfCtx, viewport }).promise;
-  pageInfo.textContent = pdfPageNum + ' / ' + currentPDF.numPages;
+  const page=await currentPDF.getPage(pdfPageNum);
+  const viewport=page.getViewport({scale:pdfScale});
+  pdfCanvas.height=viewport.height;
+  pdfCanvas.width=viewport.width;
+  await page.render({canvasContext:pdfCtx,viewport}).promise;
+  pageInfo.textContent=pdfPageNum+' / '+currentPDF.numPages;
+}
+
+// PDF Thumbnails
+const pdfThumbContainer=document.getElementById('pdfThumbnails');
+async function renderPDFThumbnails(){
+  pdfThumbContainer.innerHTML='';
+  for(let i=1;i<=currentPDF.numPages;i++){
+    const page=await currentPDF.getPage(i);
+    const viewport=page.getViewport({scale:0.2});
+    const canvas=document.createElement('canvas');
+    canvas.width=viewport.width;
+    canvas.height=viewport.height;
+    const ctx=canvas.getContext('2d');
+    await page.render({canvasContext:ctx,viewport}).promise;
+    if(i===pdfPageNum) canvas.classList.add('active');
+    canvas.addEventListener('click',()=>{ pdfPageNum=i; renderPDF(); updateActiveThumbnail(); });
+    pdfThumbContainer.appendChild(canvas);
+  }
+}
+function updateActiveThumbnail(){
+  const canvases=pdfThumbContainer.querySelectorAll('canvas');
+  canvases.forEach((c,i)=>{ c.classList.toggle('active', i+1===pdfPageNum); });
 }
 
 // PDF Controls
-document.getElementById('prevPage').addEventListener('click', ()=>{ if(pdfPageNum>1) pdfPageNum--; renderPDF(); });
-document.getElementById('nextPage').addEventListener('click', ()=>{ if(currentPDF && pdfPageNum<currentPDF.numPages) pdfPageNum++; renderPDF(); });
+document.getElementById('prevPage').addEventListener('click', ()=>{ if(pdfPageNum>1) pdfPageNum--; renderPDF(); updateActiveThumbnail(); });
+document.getElementById('nextPage').addEventListener('click', ()=>{ if(currentPDF && pdfPageNum<currentPDF.numPages) pdfPageNum++; renderPDF(); updateActiveThumbnail(); });
 document.getElementById('zoomIn').addEventListener('click', ()=>{ pdfScale+=0.25; renderPDF(); });
 document.getElementById('zoomOut').addEventListener('click', ()=>{ if(pdfScale>0.5) pdfScale-=0.25; renderPDF(); });
 
-// Excel Editing Tools
-const excelTab = tabContents.excelTab;
-document.getElementById('addRow').addEventListener('click', ()=>{ 
-  const table = excelTab.querySelector('table'); 
-  const row = table.insertRow(); 
-  for(let i=0;i<table.rows[0].cells.length;i++){ row.insertCell().contentEditable=true; } 
-});
-document.getElementById('addCol').addEventListener('click', ()=>{ 
-  const table = excelTab.querySelector('table'); 
-  for(let r of table.rows){ r.insertCell().contentEditable=true; } 
-});
+// Excel Editing
+const excelTab=tabContents.excelTab;
+document.getElementById('addRow').addEventListener('click', ()=>{ const table=excelTab.querySelector('table'); const row=table.insertRow(); for(let i=0;i<table.rows[0].cells.length;i++) row.insertCell().contentEditable=true; });
+document.getElementById('addCol').addEventListener('click', ()=>{ const table=excelTab.querySelector('table'); for(let r of table.rows) r.insertCell().contentEditable=true; });
 document.getElementById('deleteRow').addEventListener('click', ()=>{ const table=excelTab.querySelector('table'); if(table.rows.length>0) table.deleteRow(-1); });
-document.getElementById('deleteCol').addEventListener('click', ()=>{ const table=excelTab.querySelector('table'); for(let r of table.rows){ if(r.cells.length>0) r.deleteCell(-1); } });
+document.getElementById('deleteCol').addEventListener('click', ()=>{ const table=excelTab.querySelector('table'); for(let r of table.rows) if(r.cells.length>0) r.deleteCell(-1); });
 
 // Download
-document.getElementById('downloadBtn').addEventListener('click', () => {
-  let activeTab = document.querySelector('.tabs button.active').dataset.tab;
-  if(activeTab==='textTab'){ const blob = new Blob([quill.root.innerHTML], {type:'text/html'}); downloadBlob(blob,'document.html'); }
-  else if(activeTab==='excelTab'){ const blob = new Blob([excelTab.innerHTML], {type:'text/html'}); downloadBlob(blob,'spreadsheet.html'); }
-  else if(activeTab==='pdfTab' && currentPDFData){ const blob = new Blob([currentPDFData], {type:'application/pdf'}); downloadBlob(blob,'document.pdf'); }
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  let activeTab=document.querySelector('.tabs button.active').dataset.tab;
+  if(activeTab==='textTab'){ downloadBlob(new Blob([quill.root.innerHTML],{type:'text/html'}),'document.html'); }
+  else if(activeTab==='excelTab'){ downloadBlob(new Blob([excelTab.innerHTML],{type:'text/html'}),'spreadsheet.html'); }
+  else if(activeTab==='pdfTab' && currentPDFData){ downloadBlob(new Blob([currentPDFData],{type:'application/pdf'}),'document.pdf'); }
 });
 function downloadBlob(blob,filename){ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url); }
 
 // Print
-document.getElementById('printBtn').addEventListener('click', () => {
-  let activeTab = document.querySelector('.tabs button.active').dataset.tab;
-  const printWindow = window.open('', '', 'width=800,height=600');
+document.getElementById('printBtn').addEventListener('click', ()=>{
+  let activeTab=document.querySelector('.tabs button.active').dataset.tab;
+  const printWindow=window.open('','','width=800,height=600');
   if(activeTab==='textTab'){ printWindow.document.write('<html><body style="background:#1e1e2f;color:#f0f0f0;">'+quill.root.innerHTML+'</body></html>'); }
   else if(activeTab==='excelTab'){ printWindow.document.write('<html><body style="background:#1e1e2f;color:#f0f0f0;">'+excelTab.innerHTML+'</body></html>'); }
-  else if(activeTab==='pdfTab' && currentPDFData){ const blob = new Blob([currentPDFData], {type:'application/pdf'}); printWindow.location.href = URL.createObjectURL(blob); }
+  else if(activeTab==='pdfTab' && currentPDFData){ const blob=new Blob([currentPDFData],{type:'application/pdf'}); printWindow.location.href=URL.createObjectURL(blob);}
   printWindow.document.close(); printWindow.print();
 });
 </script>
