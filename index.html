@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultimate Dark Office Suite</title>
+<title>Realistic Dark Office Suite</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
@@ -12,28 +12,32 @@
 <style>
 body{background:#1e1e2f;color:#f0f0f0;font-family:'Inter',sans-serif;margin:0;padding:0;}
 .container{padding:1rem;max-width:1400px;margin:auto;}
-button{background:#3b82f6;color:white;padding:0.5rem 1rem;border-radius:0.5rem;margin:0.2rem;cursor:pointer;transition:0.2s;}
-button:hover{background:#2563eb;}
+button,select,input{background:#2b2b3b;color:#f0f0f0;padding:0.3rem 0.6rem;border-radius:0.25rem;border:1px solid #444;margin:0.2rem;cursor:pointer;}
+button:hover,select:hover,input:hover{background:#3b3b5c;}
 .tabs button{background:#3b3b5c;margin-right:0.25rem;}
 .tabs button.active{background:#3b82f6;}
-.editor-container,.excel-container,.pdf-editor{background:#2b2b3b;border-radius:0.5rem;padding:0.5rem;margin-top:1rem;min-height:300px;overflow:auto;border:1px solid #444;color:#f0f0f0;}
+.editor-container,.excel-container,.pdf-editor{background:#2b2b3b;border-radius:0.5rem;padding:0.5rem;margin-top:0.5rem;min-height:300px;overflow:auto;border:1px solid #444;color:#f0f0f0;}
 .ql-toolbar.ql-snow{background:#3b3b5c;border:1px solid #444;color:#f0f0f0;flex-wrap:wrap;}
-.ql-container.ql-snow{background:#2b2b3b;color:#f0f0f0;border:1px solid #444;min-height:200px;}
+.ql-container.ql-snow{background:#2b2b3b;color:#f0f0f0;border:1px solid #444;min-height:250px;}
 .ql-picker-label,.ql-picker-item,.ql-stroke,.ql-fill{color:#f0f0f0!important;}
 .excel-container table{border-collapse:collapse;width:100%;}
 .excel-container td,.excel-container th{border:1px solid #555;padding:0.3rem;color:#f0f0f0;background:#2b2b3b;}
 .excel-container td:focus{outline:2px solid #3b82f6;background:#3b3b5c;}
-.pdf-editor{white-space:pre-wrap;outline:none;}
+.pdf-editor{white-space:pre-wrap;outline:none;padding:0.5rem;}
 .drag-drop{border:2px dashed #3b82f6;padding:2rem;border-radius:0.5rem;text-align:center;cursor:pointer;margin-bottom:1rem;transition:0.2s;}
 .drag-drop:hover{background:#3b3b5c;}
+.toolbar-group{margin:0.2rem;display:inline-block;}
+.excel-headers{display:flex;font-weight:bold;background:#3b3b5c;}
+.excel-headers div{flex:1;padding:0.2rem;text-align:center;border:1px solid #555;}
+.formula-bar{background:#2b2b3b;color:#f0f0f0;padding:0.3rem;border:1px solid #444;margin-bottom:0.2rem;width:100%;border-radius:0.25rem;}
 </style>
 </head>
 <body>
 <div class="container">
-<h1 class="text-2xl mb-4 text-center">🗂 Ultimate Dark Office Suite</h1>
+<h1 class="text-2xl mb-2 text-center">🖥 Realistic Dark Office Suite</h1>
 
-<div class="flex flex-wrap gap-2 justify-center mb-4">
-  <button id="newText">New Text</button>
+<div class="flex flex-wrap gap-2 justify-center mb-2">
+  <button id="newText">New Word</button>
   <button id="newExcel">New Excel</button>
   <button id="newPDF">New PDF</button>
   <button id="uploadBtn">Upload</button>
@@ -42,40 +46,71 @@ button:hover{background:#2563eb;}
   <button id="clearBtn">Clear</button>
 </div>
 
-<div id="dragDrop" class="drag-drop mb-4">Drag & Drop Files Here or Tap to Browse</div>
+<div id="dragDrop" class="drag-drop mb-2">Drag & Drop Files Here or Tap to Browse</div>
 <input type="file" id="fileInput" multiple style="display:none;"/>
 
-<div class="tabs mb-4 flex flex-wrap justify-center">
+<div class="tabs mb-2 flex flex-wrap justify-center">
   <button class="active" data-tab="textTab">Word</button>
   <button data-tab="excelTab">Excel</button>
   <button data-tab="pdfTab">PDF</button>
 </div>
 
-<div id="textTab" class="editor-container"></div>
-<div id="excelTab" class="excel-container" style="display:none;"></div>
-<div id="pdfTab" class="pdf-editor" contenteditable="true" style="display:none;"></div>
+<!-- Word Toolbar -->
+<div id="wordToolbar" class="editor-container" style="display:block;">
+  <div class="toolbar-group">
+    <select class="ql-font"></select>
+    <select class="ql-size"></select>
+    <button class="ql-bold"></button>
+    <button class="ql-italic"></button>
+    <button class="ql-underline"></button>
+    <button class="ql-strike"></button>
+    <button class="ql-clean"></button>
+  </div>
+  <div class="toolbar-group">
+    <button class="ql-list" value="ordered"></button>
+    <button class="ql-list" value="bullet"></button>
+    <button class="ql-link"></button>
+    <button class="ql-image"></button>
+    <button class="ql-video"></button>
+  </div>
+  <div class="toolbar-group">
+    <select class="ql-color"></select>
+    <select class="ql-background"></select>
+    <select class="ql-align"></select>
+  </div>
+</div>
 
+<div id="textTab" class="editor-container" style="display:block;"></div>
+
+<!-- Excel Editor -->
+<input type="text" id="excelFormula" class="formula-bar" placeholder="Formula Bar" style="display:none;">
+<div id="excelTab" class="excel-container" style="display:none;"></div>
+
+<!-- PDF Editor -->
+<div id="pdfTab" class="pdf-editor" contenteditable="true" style="display:none;"></div>
 </div>
 
 <script>
-// Tabs
+// Tab switching
 const tabs=document.querySelectorAll('.tabs button');
 const editors={ textTab: document.getElementById('textTab'), excelTab: document.getElementById('excelTab'), pdfTab: document.getElementById('pdfTab') };
-tabs.forEach(tab=>tab.addEventListener('click',()=>{tabs.forEach(t=>t.classList.remove('active'));tab.classList.add('active');for(let k in editors)editors[k].style.display='none';editors[tab.dataset.tab].style.display='block';}));
+const wordToolbar=document.getElementById('wordToolbar');
+const formulaBar=document.getElementById('excelFormula');
+tabs.forEach(tab=>tab.addEventListener('click',()=>{
+  tabs.forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  for(let k in editors) editors[k].style.display='none';
+  wordToolbar.style.display='none';
+  formulaBar.style.display='none';
+  if(tab.dataset.tab==='textTab'){editors.textTab.style.display='block'; wordToolbar.style.display='block';}
+  else if(tab.dataset.tab==='excelTab'){editors.excelTab.style.display='block'; formulaBar.style.display='block';}
+  else if(tab.dataset.tab==='pdfTab') editors.pdfTab.style.display='block';
+}));
 
-// Quill Editor for Word
-const quill=new Quill('#textTab',{ theme:'snow', modules:{ toolbar:[
-  ['bold','italic','underline','strike'],
-  [{ 'font': [] }, { 'size': ['small','normal','large','huge'] }],
-  [{ 'color': [] }, { 'background': [] }],
-  [{ 'align': [] }],
-  ['link','image','video'],
-  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-  [{ 'header': [1,2,3,4,5,6,false] }, 'blockquote', 'code-block'],
-  ['clean']
-] } });
+// Quill Word Editor
+const quill=new Quill('#textTab',{theme:'snow',modules:{toolbar:'#wordToolbar'}});
 
-// File Upload
+// File Handling
 const fileInput=document.getElementById('fileInput');
 const dragDrop=document.getElementById('dragDrop');
 dragDrop.addEventListener('click',()=>fileInput.click());
@@ -87,18 +122,13 @@ fileInput.addEventListener('change',e=>handleFiles(e.target.files));
 async function handleFiles(files){
   for(let file of files){
     const ext=file.name.split('.').pop().toLowerCase();
-    if(ext==='docx'||ext==='doc'){
-      const reader=new FileReader();
-      reader.onload=async(e)=>{const arrayBuffer=e.target.result;const result=await mammoth.extractRawText({arrayBuffer});quill.setText(result.value);tabs[0].click();};
-      reader.readAsArrayBuffer(file);
-    }else if(ext==='xlsx'||ext==='xls'||ext==='csv'){
+    if(ext==='xlsx'||ext==='xls'||ext==='csv'){
       const data=await file.arrayBuffer();
       const workbook=XLSX.read(data);
       const firstSheet=workbook.Sheets[workbook.SheetNames[0]];
       editors.excelTab.innerHTML=XLSX.utils.sheet_to_html(firstSheet,{editable:true});
-      makeExcelEditable();
-      tabs[1].click();
-    }else{
+      makeExcelEditable(); tabs[1].click();
+    } else {
       const text=await file.text();
       quill.setText(text);
       tabs[0].click();
@@ -108,22 +138,37 @@ async function handleFiles(files){
 
 // New Documents
 document.getElementById('newText').addEventListener('click',()=>{ quill.setText(''); tabs[0].click(); });
-document.getElementById('newExcel').addEventListener('click',()=>{
-  tabs[1].click();
-  let html='<table>';
-  for(let i=0;i<20;i++){ html+='<tr>'; for(let j=0;j<20;j++) html+='<td contenteditable="true"></td>'; html+='</tr>'; }
-  html+='</table>';
-  editors.excelTab.innerHTML=html;
-});
+document.getElementById('newExcel').addEventListener('click',()=>{ tabs[1].click(); createExcelGrid(20,20); });
 document.getElementById('newPDF').addEventListener('click',()=>{ editors.pdfTab.innerHTML=''; tabs[2].click(); });
 
-// Excel Editable
-function makeExcelEditable(){
-  const cells=editors.excelTab.querySelectorAll('td');
-  cells.forEach(cell=>{ cell.setAttribute('contenteditable','true'); });
+// Excel Grid
+function createExcelGrid(rows,cols){
+  let html='<div class="excel-headers"><div></div>';
+  for(let c=0;c<cols;c++) html+='<div>'+String.fromCharCode(65+c)+'</div>';
+  html+='</div><table>';
+  for(let r=0;r<rows;r++){
+    html+='<tr><th>'+(r+1)+'</th>';
+    for(let c=0;c<cols;c++) html+='<td contenteditable="true"></td>';
+    html+='</tr>';
+  }
+  html+='</table>';
+  editors.excelTab.innerHTML=html;
 }
 
-// Excel Formulas (basic)
+// Excel Editable & Formula Bar
+function makeExcelEditable(){
+  const cells=editors.excelTab.querySelectorAll('td');
+  cells.forEach(cell=>{
+    cell.addEventListener('focus',()=>formulaBar.value=cell.innerText);
+    cell.addEventListener('input',()=>formulaBar.value=cell.innerText);
+  });
+}
+formulaBar.addEventListener('change',()=>{
+  const active=document.activeElement;
+  if(active.tagName==='TD'){active.innerText=formulaBar.value;}
+});
+
+// Excel Formulas
 function calculateExcel(){
   const table=editors.excelTab.querySelector('table');
   if(!table) return;
