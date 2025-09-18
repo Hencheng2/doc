@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pro Document Editor & Viewer</title>
+<title>Dark Pro Document Editor & Viewer</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
@@ -17,14 +17,21 @@ body { background-color: #1e1e2f; color: #f0f0f0; font-family: 'Inter', sans-ser
 button { background-color: #3b82f6; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; margin-right: 0.5rem; }
 .tabs button { background-color: #3b3b5c; margin-right: 0.25rem; }
 .tabs button.active { background-color: #3b82f6; }
+.pdf-controls, .excel-controls, .quill-toolbar { margin-top: 0.5rem; }
+.drag-drop { border: 2px dashed #3b82f6; padding: 2rem; border-radius: 0.5rem; text-align: center; cursor: pointer; margin-bottom: 1rem; }
+.ql-toolbar.ql-snow { background-color: #3b3b5c; border: 1px solid #444; color: white; }
+.ql-container.ql-snow { background-color: #2b2b3b; color: #f0f0f0; border: 1px solid #444; }
 </style>
 </head>
 <body class="p-5">
 
-<h1 class="text-2xl mb-4">🗂 Pro Document Editor & Viewer</h1>
+<h1 class="text-2xl mb-4">🗂 Dark Pro Document Editor & Viewer</h1>
 
-<!-- File Upload -->
-<input type="file" id="fileInput" class="mb-4" multiple />
+<!-- Drag and Drop Upload -->
+<div id="dragDrop" class="drag-drop mb-4">
+  Drag & Drop Files Here or Click to Browse
+</div>
+<input type="file" id="fileInput" multiple style="display:none;"/>
 
 <!-- Tabs -->
 <div class="tabs mb-4">
@@ -35,8 +42,25 @@ button { background-color: #3b82f6; color: white; padding: 0.5rem 1rem; border-r
 
 <!-- Editors/Viewer -->
 <div id="textTab" class="editor-container"></div>
-<canvas id="pdfTab" class="pdf-container" style="display:none;"></canvas>
+
+<div>
+  <canvas id="pdfTab" class="pdf-container" style="display:none;"></canvas>
+  <div class="pdf-controls flex flex-wrap gap-2 mt-2">
+    <button id="prevPage">⬅ Prev</button>
+    <span id="pageInfo">1 / 1</span>
+    <button id="nextPage">Next ➡</button>
+    <button id="zoomIn">Zoom +</button>
+    <button id="zoomOut">Zoom -</button>
+  </div>
+</div>
+
 <div id="excelTab" class="excel-container" style="display:none;"></div>
+<div class="excel-controls flex gap-2 mt-2">
+  <button id="addRow">Add Row</button>
+  <button id="addCol">Add Column</button>
+  <button id="deleteRow">Delete Last Row</button>
+  <button id="deleteCol">Delete Last Column</button>
+</div>
 
 <!-- Buttons -->
 <div class="mb-4">
@@ -46,11 +70,7 @@ button { background-color: #3b82f6; color: white; padding: 0.5rem 1rem; border-r
 
 <script>
 const tabs = document.querySelectorAll('.tabs button');
-const tabContents = { 
-  textTab: document.getElementById('textTab'), 
-  pdfTab: document.getElementById('pdfTab'), 
-  excelTab: document.getElementById('excelTab') 
-};
+const tabContents = { textTab: document.getElementById('textTab'), pdfTab: document.getElementById('pdfTab'), excelTab: document.getElementById('excelTab') };
 
 // Switch Tabs
 tabs.forEach(tab => {
@@ -58,102 +78,106 @@ tabs.forEach(tab => {
     tabs.forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     for (let key in tabContents) tabContents[key].style.display = 'none';
-    tabContents[tab.dataset.tab].style.display = (tab.dataset.tab==='pdfTab')?'block':'block';
-    if(tab.dataset.tab!=='pdfTab') tabContents[tab.dataset.tab].style.display='block';
-    if(tab.dataset.tab==='pdfTab') renderPDF(); // re-render if switching back
+    tabContents[tab.dataset.tab].style.display = 'block';
+    if(tab.dataset.tab==='pdfTab') renderPDF();
   });
 });
 
 // Initialize Quill Editor
-const quill = new Quill('#textTab', { theme: 'snow', modules: { toolbar: [['bold','italic'], ['link','image'], [{ 'list': 'ordered'}, { 'list': 'bullet' }]] } });
+const quill = new Quill('#textTab', {
+  theme: 'snow',
+  modules: { toolbar: [['bold','italic','underline'], ['link','image'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], [{ 'align': [] }], ['clean']] }
+});
 
 // File Handling
 const fileInput = document.getElementById('fileInput');
-let currentPDF = null;
-let currentPDFData = null;
+const dragDrop = document.getElementById('dragDrop');
+let currentPDF = null, currentPDFData = null, pdfPageNum = 1, pdfScale = 1.5;
 
-fileInput.addEventListener('change', async (e) => {
-  const files = e.target.files;
+dragDrop.addEventListener('click', ()=>fileInput.click());
+dragDrop.addEventListener('dragover', (e)=>{ e.preventDefault(); dragDrop.style.backgroundColor='#3b3b5c'; });
+dragDrop.addEventListener('dragleave', ()=>{ dragDrop.style.backgroundColor='#2b2b3b'; });
+dragDrop.addEventListener('drop', (e)=>{
+  e.preventDefault(); dragDrop.style.backgroundColor='#2b2b3b';
+  handleFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', (e)=> handleFiles(e.target.files));
+
+async function handleFiles(files){
   for (let file of files) {
     const ext = file.name.split('.').pop().toLowerCase();
-
     if(ext === 'pdf') {
       currentPDFData = await file.arrayBuffer();
       currentPDF = await pdfjsLib.getDocument({ data: currentPDFData }).promise;
-      tabs[1].click(); // switch to PDF tab
-      renderPDF();
+      pdfPageNum = 1; pdfScale = 1.5; tabs[1].click(); renderPDF();
     }
     else if(ext==='docx'||ext==='doc') {
       const reader = new FileReader();
-      reader.onload = async (event) => {
-        const arrayBuffer = event.target.result;
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        quill.setText(result.value);
-        tabs[0].click();
-      }
+      reader.onload = async (event) => { const arrayBuffer = event.target.result; const result = await mammoth.extractRawText({ arrayBuffer }); quill.setText(result.value); tabs[0].click(); }
       reader.readAsArrayBuffer(file);
     }
     else if(ext==='xlsx'||ext==='xls'||ext==='csv') {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const html = XLSX.utils.sheet_to_html(firstSheet);
-      tabContents.excelTab.innerHTML = html;
+      tabContents.excelTab.innerHTML = XLSX.utils.sheet_to_html(firstSheet);
       tabs[2].click();
     }
-    else {
-      const text = await file.text();
-      quill.setText(text);
-      tabs[0].click();
-    }
+    else { const text = await file.text(); quill.setText(text); tabs[0].click(); }
   }
-});
+}
 
 // PDF Rendering
 const pdfCanvas = document.getElementById('pdfTab');
 const pdfCtx = pdfCanvas.getContext('2d');
+const pageInfo = document.getElementById('pageInfo');
 async function renderPDF() {
   if(!currentPDF) return;
-  const page = await currentPDF.getPage(1);
-  const viewport = page.getViewport({ scale: 1.5 });
+  const page = await currentPDF.getPage(pdfPageNum);
+  const viewport = page.getViewport({ scale: pdfScale });
   pdfCanvas.height = viewport.height;
   pdfCanvas.width = viewport.width;
   await page.render({ canvasContext: pdfCtx, viewport }).promise;
+  pageInfo.textContent = pdfPageNum + ' / ' + currentPDF.numPages;
 }
+
+// PDF Controls
+document.getElementById('prevPage').addEventListener('click', ()=>{ if(pdfPageNum>1) pdfPageNum--; renderPDF(); });
+document.getElementById('nextPage').addEventListener('click', ()=>{ if(currentPDF && pdfPageNum<currentPDF.numPages) pdfPageNum++; renderPDF(); });
+document.getElementById('zoomIn').addEventListener('click', ()=>{ pdfScale+=0.25; renderPDF(); });
+document.getElementById('zoomOut').addEventListener('click', ()=>{ if(pdfScale>0.5) pdfScale-=0.25; renderPDF(); });
+
+// Excel Editing Tools
+const excelTab = tabContents.excelTab;
+document.getElementById('addRow').addEventListener('click', ()=>{ 
+  const table = excelTab.querySelector('table'); 
+  const row = table.insertRow(); 
+  for(let i=0;i<table.rows[0].cells.length;i++){ row.insertCell().contentEditable=true; } 
+});
+document.getElementById('addCol').addEventListener('click', ()=>{ 
+  const table = excelTab.querySelector('table'); 
+  for(let r of table.rows){ r.insertCell().contentEditable=true; } 
+});
+document.getElementById('deleteRow').addEventListener('click', ()=>{ const table=excelTab.querySelector('table'); if(table.rows.length>0) table.deleteRow(-1); });
+document.getElementById('deleteCol').addEventListener('click', ()=>{ const table=excelTab.querySelector('table'); for(let r of table.rows){ if(r.cells.length>0) r.deleteCell(-1); } });
 
 // Download
 document.getElementById('downloadBtn').addEventListener('click', () => {
   let activeTab = document.querySelector('.tabs button.active').dataset.tab;
-  if(activeTab==='textTab'){
-    const blob = new Blob([quill.root.innerHTML], {type:'text/html'});
-    const url = URL.createObjectURL(blob);
-    const a=document.createElement('a'); a.href=url; a.download='document.html'; a.click(); URL.revokeObjectURL(url);
-  } else if(activeTab==='excelTab'){
-    const blob = new Blob([tabContents.excelTab.innerHTML], {type:'text/html'});
-    const url = URL.createObjectURL(blob);
-    const a=document.createElement('a'); a.href=url; a.download='spreadsheet.html'; a.click(); URL.revokeObjectURL(url);
-  } else if(activeTab==='pdfTab' && currentPDFData){
-    const blob = new Blob([currentPDFData], {type:'application/pdf'});
-    const url = URL.createObjectURL(blob);
-    const a=document.createElement('a'); a.href=url; a.download='document.pdf'; a.click(); URL.revokeObjectURL(url);
-  }
+  if(activeTab==='textTab'){ const blob = new Blob([quill.root.innerHTML], {type:'text/html'}); downloadBlob(blob,'document.html'); }
+  else if(activeTab==='excelTab'){ const blob = new Blob([excelTab.innerHTML], {type:'text/html'}); downloadBlob(blob,'spreadsheet.html'); }
+  else if(activeTab==='pdfTab' && currentPDFData){ const blob = new Blob([currentPDFData], {type:'application/pdf'}); downloadBlob(blob,'document.pdf'); }
 });
+function downloadBlob(blob,filename){ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url); }
 
 // Print
 document.getElementById('printBtn').addEventListener('click', () => {
   let activeTab = document.querySelector('.tabs button.active').dataset.tab;
   const printWindow = window.open('', '', 'width=800,height=600');
-  if(activeTab==='textTab'){
-    printWindow.document.write('<html><body style="background:#1e1e2f;color:#f0f0f0;">'+quill.root.innerHTML+'</body></html>');
-  } else if(activeTab==='excelTab'){
-    printWindow.document.write('<html><body style="background:#1e1e2f;color:#f0f0f0;">'+tabContents.excelTab.innerHTML+'</body></html>');
-  } else if(activeTab==='pdfTab' && currentPDFData){
-    const blob = new Blob([currentPDFData], {type:'application/pdf'});
-    const url = URL.createObjectURL(blob);
-    printWindow.location.href = url;
-  }
-  printWindow.document.close();
-  printWindow.print();
+  if(activeTab==='textTab'){ printWindow.document.write('<html><body style="background:#1e1e2f;color:#f0f0f0;">'+quill.root.innerHTML+'</body></html>'); }
+  else if(activeTab==='excelTab'){ printWindow.document.write('<html><body style="background:#1e1e2f;color:#f0f0f0;">'+excelTab.innerHTML+'</body></html>'); }
+  else if(activeTab==='pdfTab' && currentPDFData){ const blob = new Blob([currentPDFData], {type:'application/pdf'}); printWindow.location.href = URL.createObjectURL(blob); }
+  printWindow.document.close(); printWindow.print();
 });
 </script>
 
