@@ -3,938 +3,454 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexDoc - Modern Document Editor</title>
+    <title>UniDoc Suite - Unified Document Editor</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --bg-primary: #1a1a1a;
-            --bg-secondary: #2d2d2d;
-            --bg-tertiary: #3d3d3d;
-            --text-primary: #ffffff;
-            --text-secondary: #cccccc;
-            --accent: #4a86e8;
-            --accent-hover: #5a96f8;
-            --danger: #e84a4a;
-            --success: #4ae84a;
-            --border: #555555;
-            --shadow: rgba(0, 0, 0, 0.5);
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+        
         body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             overflow: hidden;
         }
-
-        .header {
-            background-color: var(--bg-secondary);
-            padding: 12px 20px;
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border);
-            box-shadow: 0 2px 10px var(--shadow);
         }
-
+        
         .logo {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-weight: bold;
-            font-size: 1.5rem;
+            font-size: 24px;
+            font-weight: 700;
         }
-
+        
         .logo i {
-            color: var(--accent);
+            color: #3498db;
         }
-
-        .menu-bar {
-            background-color: var(--bg-secondary);
-            padding: 8px 20px;
+        
+        .tabs {
+            display: flex;
+            background: #ecf0f1;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            font-weight: 600;
+            border-right: 1px solid #ddd;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: white;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .tab:hover {
+            background: #d6dbdf;
+        }
+        
+        .toolbar {
+            padding: 10px 20px;
+            background: #f8f9fa;
             display: flex;
             gap: 15px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .menu-item {
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .menu-item:hover {
-            background-color: var(--bg-tertiary);
-        }
-
-        .toolbar {
-            background-color: var(--bg-tertiary);
-            padding: 10px 20px;
-            display: flex;
+            border-bottom: 1px solid #ddd;
             flex-wrap: wrap;
-            gap: 10px;
-            border-bottom: 1px solid var(--border);
         }
-
+        
         .tool-group {
             display: flex;
             gap: 5px;
             padding-right: 15px;
-            border-right: 1px solid var(--border);
+            border-right: 1px solid #ddd;
+            align-items: center;
         }
-
+        
         .tool-group:last-child {
             border-right: none;
         }
-
+        
         .tool-btn {
-            background-color: transparent;
-            color: var(--text-secondary);
-            border: none;
-            width: 36px;
-            height: 36px;
+            padding: 8px 12px;
             border-radius: 4px;
             cursor: pointer;
+            background: white;
+            border: 1px solid #ddd;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 16px;
+            gap: 5px;
             transition: all 0.2s;
         }
-
+        
         .tool-btn:hover {
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
+            background: #e3f2fd;
+            border-color: #3498db;
         }
-
-        .tool-btn.active {
-            background-color: var(--accent);
-            color: white;
-        }
-
-        .main-container {
+        
+        .editor-area {
             display: flex;
-            flex: 1;
-            overflow: hidden;
+            height: 500px;
         }
-
-        .sidebar {
-            width: 250px;
-            background-color: var(--bg-secondary);
-            border-right: 1px solid var(--border);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            overflow-y: auto;
-        }
-
-        .sidebar-section {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .sidebar-title {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .sidebar-btn {
-            background-color: transparent;
-            color: var(--text-primary);
-            border: none;
-            padding: 10px;
-            border-radius: 4px;
-            text-align: left;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: background-color 0.2s;
-        }
-
-        .sidebar-btn:hover {
-            background-color: var(--bg-tertiary);
-        }
-
-        .editor-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .format-bar {
-            background-color: var(--bg-tertiary);
-            padding: 10px 20px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .format-select {
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 5px;
-            cursor: pointer;
-        }
-
-        .format-input {
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 5px;
-            width: 60px;
-        }
-
+        
         .editor {
+            display: none;
             flex: 1;
+            padding: 20px;
+            overflow: auto;
+        }
+        
+        .editor.active {
+            display: block;
+        }
+        
+        #word-editor {
             padding: 30px;
-            overflow-y: auto;
-            background-color: var(--bg-primary);
-            background-image: linear-gradient(var(--bg-tertiary) 1px, transparent 0),
-                              linear-gradient(90deg, var(--bg-tertiary) 1px, transparent 0);
-            background-size: 20px 20px;
-            background-position: center center;
+            line-height: 1.6;
         }
-
-        .document {
-            background-color: var(--bg-secondary);
-            min-height: 842px;
-            width: 595px;
-            margin: 0 auto;
-            padding: 40px;
-            box-shadow: 0 0 20px var(--shadow);
-            border-radius: 4px;
+        
+        #spreadsheet-editor {
+            padding: 0;
         }
-
-        .document-content {
-            min-height: 100%;
+        
+        .sheet-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            border: 1px solid #ddd;
+        }
+        
+        .cell {
+            padding: 8px;
+            border: 1px solid #ddd;
+            min-height: 40px;
             outline: none;
         }
-
-        .status-bar {
-            background-color: var(--bg-secondary);
-            padding: 8px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid var(--border);
-            font-size: 0.9rem;
-            color: var(--text-secondary);
+        
+        .cell.header {
+            background: #f2f2f2;
+            font-weight: bold;
+            text-align: center;
         }
-
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+        
+        #slides-editor {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+            background: #f0f0f0;
         }
-
-        .modal.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .modal-content {
-            background-color: var(--bg-secondary);
-            width: 400px;
+        
+        .slide-container {
+            width: 80%;
+            height: 350px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px var(--shadow);
+            padding: 30px;
+            text-align: center;
         }
-
-        .modal-header {
-            padding: 15px 20px;
-            background-color: var(--bg-tertiary);
+        
+        .slide-title {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .slide-content {
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        
+        .slide-nav {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .status-bar {
+            padding: 8px 20px;
+            background: #2c3e50;
+            color: white;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            font-size: 14px;
         }
-
-        .modal-title {
-            font-size: 1.2rem;
-            font-weight: 500;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .modal-input {
-            width: 100%;
-            padding: 10px;
-            border-radius: 4px;
-            border: 1px solid var(--border);
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            margin-bottom: 15px;
-        }
-
-        .modal-btn {
-            padding: 10px 15px;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.2s;
-        }
-
-        .modal-btn-primary {
-            background-color: var(--accent);
-            color: white;
-        }
-
-        .modal-btn-primary:hover {
-            background-color: var(--accent-hover);
-        }
-
-        .modal-btn-secondary {
-            background-color: transparent;
-            color: var(--text-secondary);
-            border: 1px solid var(--border);
-        }
-
-        .modal-btn-secondary:hover {
-            background-color: var(--bg-tertiary);
-        }
-
-        .modal-footer {
-            padding: 15px 20px;
-            background-color: var(--bg-tertiary);
+        
+        .zoom-controls {
             display: flex;
-            justify-content: flex-end;
             gap: 10px;
         }
-
-        .tab-container {
-            display: flex;
-            background-color: var(--bg-tertiary);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-right: 1px solid var(--border);
-            transition: background-color 0.2s;
-        }
-
-        .tab.active {
-            background-color: var(--accent);
-        }
-
-        .tab:hover:not(.active) {
-            background-color: var(--bg-secondary);
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border-radius: 4px;
+        
+        .zoom-btn {
+            background: none;
             border: none;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background-color: var(--accent);
             color: white;
+            cursor: pointer;
+            font-size: 16px;
         }
-
-        .btn-primary:hover {
-            background-color: var(--accent-hover);
+        
+        h1 {
+            margin-bottom: 15px;
+            color: #2c3e50;
         }
-
-        .btn-secondary {
-            background-color: transparent;
-            color: var(--text-secondary);
-            border: 1px solid var(--border);
+        
+        p {
+            margin-bottom: 15px;
         }
-
-        .btn-secondary:hover {
-            background-color: var(--bg-tertiary);
+        
+        .content-area {
+            margin-top: 20px;
         }
-
-        .divider {
-            height: 1px;
-            background-color: var(--border);
-            margin: 10px 0;
+        
+        .btn {
+            padding: 10px 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
         }
-
-        @media (max-width: 1200px) {
-            .sidebar {
-                width: 200px;
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        @media (max-width: 768px) {
+            .toolbar {
+                flex-direction: column;
+                gap: 10px;
             }
-        }
-
-        @media (max-width: 992px) {
-            .sidebar {
-                display: none;
+            
+            .tool-group {
+                border-right: none;
+                padding-right: 0;
+                flex-wrap: wrap;
+            }
+            
+            .editor-area {
+                height: auto;
+                min-height: 400px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">
-            <i class="fas fa-file-alt"></i>
-            <span>NexDoc Editor</span>
-        </div>
-        <div>
-            <button class="btn btn-secondary">
-                <i class="fas fa-question-circle"></i> Help
-            </button>
-        </div>
-    </div>
-
-    <div class="tab-container">
-        <div class="tab active">Untitled Document</div>
-    </div>
-
-    <div class="menu-bar">
-        <div class="menu-item">File</div>
-        <div class="menu-item">Edit</div>
-        <div class="menu-item">View</div>
-        <div class="menu-item">Insert</div>
-        <div class="menu-item">Format</div>
-        <div class="menu-item">Tools</div>
-        <div class="menu-item">Help</div>
-    </div>
-
-    <div class="toolbar">
-        <div class="tool-group">
-            <button class="tool-btn" title="New" id="newDoc">
-                <i class="fas fa-plus"></i>
-            </button>
-            <button class="tool-btn" title="Open" id="openDoc">
-                <i class="fas fa-folder-open"></i>
-            </button>
-            <button class="tool-btn" title="Save" id="saveDoc">
-                <i class="fas fa-save"></i>
-            </button>
-        </div>
-        <div class="tool-group">
-            <button class="tool-btn" title="Print" id="printDoc">
-                <i class="fas fa-print"></i>
-            </button>
-            <button class="tool-btn" title="Download" id="downloadDoc">
-                <i class="fas fa-download"></i>
-            </button>
-            <button class="tool-btn" title="Upload" id="uploadDoc">
-                <i class="fas fa-upload"></i>
-            </button>
-        </div>
-        <div class="tool-group">
-            <button class="tool-btn" title="Undo" id="undoBtn">
-                <i class="fas fa-undo"></i>
-            </button>
-            <button class="tool-btn" title="Redo" id="redoBtn">
-                <i class="fas fa-redo"></i>
-            </button>
-        </div>
-        <div class="tool-group">
-            <button class="tool-btn" title="Bold" id="boldBtn">
-                <i class="fas fa-bold"></i>
-            </button>
-            <button class="tool-btn" title="Italic" id="italicBtn">
-                <i class="fas fa-italic"></i>
-            </button>
-            <button class="tool-btn" title="Underline" id="underlineBtn">
-                <i class="fas fa-underline"></i>
-            </button>
-        </div>
-        <div class="tool-group">
-            <button class="tool-btn" title="Align Left" id="alignLeftBtn">
-                <i class="fas fa-align-left"></i>
-            </button>
-            <button class="tool-btn" title="Align Center" id="alignCenterBtn">
-                <i class="fas fa-align-center"></i>
-            </button>
-            <button class="tool-btn" title="Align Right" id="alignRightBtn">
-                <i class="fas fa-align-right"></i>
-            </button>
-            <button class="tool-btn" title="Justify" id="justifyBtn">
-                <i class="fas fa-align-justify"></i>
-            </button>
-        </div>
-        <div class="tool-group">
-            <button class="tool-btn" title="Bullet List" id="bulletListBtn">
-                <i class="fas fa-list-ul"></i>
-            </button>
-            <button class="tool-btn" title="Numbered List" id="numberedListBtn">
-                <i class="fas fa-list-ol"></i>
-            </button>
-            <button class="tool-btn" title="Indent" id="indentBtn">
-                <i class="fas fa-indent"></i>
-            </button>
-            <button class="tool-btn" title="Outdent" id="outdentBtn">
-                <i class="fas fa-outdent"></i>
-            </button>
-        </div>
-        <div class="tool-group">
-            <button class="tool-btn" title="Insert Image" id="insertImageBtn">
-                <i class="fas fa-image"></i>
-            </button>
-            <button class="tool-btn" title="Insert Table" id="insertTableBtn">
-                <i class="fas fa-table"></i>
-            </button>
-            <button class="tool-btn" title="Insert Link" id="insertLinkBtn">
-                <i class="fas fa-link"></i>
-            </button>
-        </div>
-    </div>
-
-    <div class="main-container">
-        <div class="editor-container">
-            <div class="format-bar">
-                <select class="format-select" id="formatBlock">
-                    <option value="p">Normal</option>
-                    <option value="h1">Heading 1</option>
-                    <option value="h2">Heading 2</option>
-                    <option value="h3">Heading 3</option>
-                    <option value="h4">Title</option>
-                    <option value="h5">Subtitle</option>
-                </select>
-                <select class="format-select" id="fontFamily">
-                    <option value="Arial">Arial</option>
-                    <option value="Times New Roman">Times New Roman</option>
-                    <option value="Courier New">Courier New</option>
-                    <option value="Georgia">Georgia</option>
-                    <option value="Verdana">Verdana</option>
-                </select>
-                <select class="format-select" id="fontSize">
-                    <option value="1">8</option>
-                    <option value="2">10</option>
-                    <option value="3">12</option>
-                    <option value="4">14</option>
-                    <option value="5" selected>16</option>
-                    <option value="6">18</option>
-                    <option value="7">24</option>
-                </select>
-                <input type="color" class="format-input" id="textColor" value="#ffffff" title="Text Color">
-                <input type="color" class="format-input" id="bgColor" value="#3d3d3d" title="Background Color">
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-file-alt"></i>
+                <span>UniDoc Suite</span>
             </div>
-
-            <div class="editor">
-                <div class="document">
-                    <div class="document-content" id="editor" contenteditable="true">
-                        <h1>Welcome to NexDoc Editor</h1>
-                        <p>This is a modern document editor with a dark theme. You can create, edit, and view documents in various formats.</p>
-                        <p>Try out the formatting tools above to style your content. You can change fonts, colors, alignment, and more.</p>
-                        <h2>Features</h2>
-                        <ul>
-                            <li>Support for multiple document formats</li>
-                            <li>Advanced formatting options</li>
-                            <li>Formulas and functions</li>
-                            <li>Upload and download capabilities</li>
-                            <li>Printing support</li>
-                        </ul>
-                        <h2>Getting Started</h2>
-                        <p>Start typing to create your document. Use the toolbar buttons to format your content.</p>
-                        <p>You can insert images, tables, and links using the insert options.</p>
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span>User</span>
+            </div>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" data-target="word-editor">Document</div>
+            <div class="tab" data-target="spreadsheet-editor">Spreadsheet</div>
+            <div class="tab" data-target="slides-editor">Presentation</div>
+        </div>
+        
+        <div class="toolbar">
+            <div class="tool-group">
+                <button class="tool-btn"><i class="fas fa-save"></i> Save</button>
+                <button class="tool-btn"><i class="fas fa-file-export"></i> Export</button>
+            </div>
+            <div class="tool-group">
+                <button class="tool-btn"><i class="fas fa-bold"></i></button>
+                <button class="tool-btn"><i class="fas fa-italic"></i></button>
+                <button class="tool-btn"><i class="fas fa-underline"></i></button>
+            </div>
+            <div class="tool-group">
+                <button class="tool-btn"><i class="fas fa-align-left"></i></button>
+                <button class="tool-btn"><i class="fas fa-align-center"></i></button>
+                <button class="tool-btn"><i class="fas fa-align-right"></i></button>
+            </div>
+            <div class="tool-group">
+                <button class="tool-btn"><i class="fas fa-image"></i> Image</button>
+                <button class="tool-btn"><i class="fas fa-table"></i> Table</button>
+                <button class="tool-btn"><i class="fas fa-chart-bar"></i> Chart</button>
+            </div>
+        </div>
+        
+        <div class="editor-area">
+            <div id="word-editor" class="editor active">
+                <h1 contenteditable="true">Welcome to UniDoc Suite</h1>
+                <p contenteditable="true">This is a unified document editor that combines the functionality of word processing, spreadsheets, and presentations in a single application.</p>
+                
+                <div class="content-area">
+                    <p contenteditable="true">Try editing this text. You can format content using the toolbar above.</p>
+                    <p contenteditable="true">Create professional documents, analyze data, and design presentations - all in one place.</p>
+                </div>
+                
+                <button class="btn"><i class="fas fa-plus"></i> Add New Page</button>
+            </div>
+            
+            <div id="spreadsheet-editor" class="editor">
+                <div class="sheet-grid">
+                    <div class="cell header">A1</div>
+                    <div class="cell header">B1</div>
+                    <div class="cell header">C1</div>
+                    <div class="cell header">D1</div>
+                    <div class="cell header">E1</div>
+                    <div class="cell header">F1</div>
+                    <div class="cell header">G1</div>
+                    <div class="cell header">H1</div>
+                    <div class="cell header">I1</div>
+                    <div class="cell header">J1</div>
+                    
+                    <div class="cell header">1</div>
+                    <div class="cell" contenteditable="true">Q1 Sales</div>
+                    <div class="cell" contenteditable="true">Q2 Sales</div>
+                    <div class="cell" contenteditable="true">Q3 Sales</div>
+                    <div class="cell" contenteditable="true">Q4 Sales</div>
+                    <div class="cell" contenteditable="true">Total</div>
+                    <div class="cell" contenteditable="true">Growth</div>
+                    <div class="cell" contenteditable="true"></div>
+                    <div class="cell" contenteditable="true"></div>
+                    <div class="cell" contenteditable="true"></div>
+                    
+                    <div class="cell header">2</div>
+                    <div class="cell" contenteditable="true">12500</div>
+                    <div class="cell" contenteditable="true">14200</div>
+                    <div class="cell" contenteditable="true">13800</div>
+                    <div class="cell" contenteditable="true">16700</div>
+                    <div class="cell" contenteditable="true">=SUM(B2:E2)</div>
+                    <div class="cell" contenteditable="true">=((E2-B2)/B2)</div>
+                    <div class="cell" contenteditable="true"></div>
+                    <div class="cell" contenteditable="true"></div>
+                    <div class="cell" contenteditable="true"></div>
+                    
+                    <div class="cell header">3</div>
+                    <div class="cell" contenteditable="true">Product A</div>
+                    <div class="cell" contenteditable="true">9800</div>
+                    <div class="cell" contenteditable="true">10200</div>
+                    <div class="cell" contenteditable="true">11500</div>
+                    <div class="cell" contenteditable="true">12000</div>
+                    <div class="cell" contenteditable="true">=SUM(B3:E3)</div>
+                    <div class="cell" contenteditable="true"></div>
+                    <div class="cell" contenteditable="true"></div>
+                    <div class="cell" contenteditable="true"></div>
+                </div>
+            </div>
+            
+            <div id="slides-editor" class="editor">
+                <div class="slide-container">
+                    <h1 class="slide-title" contenteditable="true">Unified Presentation</h1>
+                    <div class="slide-content" contenteditable="true">
+                        <p>Create beautiful presentations with integrated content from documents and spreadsheets.</p>
+                        <p>All your work in one unified suite.</p>
                     </div>
+                </div>
+                <div class="slide-nav">
+                    <button class="btn"><i class="fas fa-chevron-left"></i> Previous</button>
+                    <button class="btn">Next <i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="status-bar">
-        <div>Page 1 of 1</div>
-        <div>Words: <span id="wordCount">0</span></div>
-        <div>100%</div>
-    </div>
-
-    <!-- Upload Modal -->
-    <div class="modal" id="uploadModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Upload Document</div>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>Select a document to upload:</p>
-                <input type="file" id="fileInput" class="modal-input" accept=".txt,.html,.docx,.pdf">
-                <p>Supported formats: TXT, HTML</p>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn modal-btn-secondary" id="cancelUpload">Cancel</button>
-                <button class="modal-btn modal-btn-primary" id="confirmUpload">Upload</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Insert Link Modal -->
-    <div class="modal" id="linkModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Insert Link</div>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>Enter URL:</p>
-                <input type="url" id="linkUrl" class="modal-input" placeholder="https://example.com">
-                <p>Text to display (optional):</p>
-                <input type="text" id="linkText" class="modal-input" placeholder="Link text">
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn modal-btn-secondary" id="cancelLink">Cancel</button>
-                <button class="modal-btn modal-btn-primary" id="insertLink">Insert</button>
+        
+        <div class="status-bar">
+            <div class="page-info">Page 1 of 1</div>
+            <div class="zoom-controls">
+                <button class="zoom-btn"><i class="fas fa-search-minus"></i></button>
+                <span>100%</span>
+                <button class="zoom-btn"><i class="fas fa-search-plus"></i></button>
             </div>
         </div>
     </div>
 
     <script>
-        // DOM Elements
-        const editor = document.getElementById('editor');
-        const wordCountElement = document.getElementById('wordCount');
-        const uploadModal = document.getElementById('uploadModal');
-        const linkModal = document.getElementById('linkModal');
-        const fileInput = document.getElementById('fileInput');
-        
-        // Formatting elements
-        const formatBlock = document.getElementById('formatBlock');
-        const fontFamily = document.getElementById('fontFamily');
-        const fontSize = document.getElementById('fontSize');
-        const textColor = document.getElementById('textColor');
-        const bgColor = document.getElementById('bgColor');
-        
-        // Tool buttons
-        const boldBtn = document.getElementById('boldBtn');
-        const italicBtn = document.getElementById('italicBtn');
-        const underlineBtn = document.getElementById('underlineBtn');
-        const alignLeftBtn = document.getElementById('alignLeftBtn');
-        const alignCenterBtn = document.getElementById('alignCenterBtn');
-        const alignRightBtn = document.getElementById('alignRightBtn');
-        const justifyBtn = document.getElementById('justifyBtn');
-        const bulletListBtn = document.getElementById('bulletListBtn');
-        const numberedListBtn = document.getElementById('numberedListBtn');
-        const indentBtn = document.getElementById('indentBtn');
-        const outdentBtn = document.getElementById('outdentBtn');
-        const insertImageBtn = document.getElementById('insertImageBtn');
-        const insertTableBtn = document.getElementById('insertTableBtn');
-        const insertLinkBtn = document.getElementById('insertLinkBtn');
-        const uploadDocBtn = document.getElementById('uploadDoc');
-        const downloadDocBtn = document.getElementById('downloadDoc');
-        const printDocBtn = document.getElementById('printDoc');
-        const newDocBtn = document.getElementById('newDoc');
-        const saveDocBtn = document.getElementById('saveDoc');
-        const undoBtn = document.getElementById('undoBtn');
-        const redoBtn = document.getElementById('redoBtn');
-        
-        // Modal buttons
-        const confirmUpload = document.getElementById('confirmUpload');
-        const cancelUpload = document.getElementById('cancelUpload');
-        const insertLink = document.getElementById('insertLink');
-        const cancelLink = document.getElementById('cancelLink');
-        const modalCloses = document.querySelectorAll('.modal-close');
-        
-        // Initialize word count
-        updateWordCount();
-        
-        // Event Listeners for formatting
-        formatBlock.addEventListener('change', () => {
-            document.execCommand('formatBlock', false, formatBlock.value);
-            editor.focus();
-        });
-        
-        fontFamily.addEventListener('change', () => {
-            document.execCommand('fontName', false, fontFamily.value);
-            editor.focus();
-        });
-        
-        fontSize.addEventListener('change', () => {
-            document.execCommand('fontSize', false, fontSize.value);
-            editor.focus();
-        });
-        
-        textColor.addEventListener('input', () => {
-            document.execCommand('foreColor', false, textColor.value);
-            editor.focus();
-        });
-        
-        bgColor.addEventListener('input', () => {
-            document.execCommand('hiliteColor', false, bgColor.value);
-            editor.focus();
-        });
-        
-        // Event listeners for formatting buttons
-        boldBtn.addEventListener('click', () => {
-            document.execCommand('bold', false, null);
-            editor.focus();
-        });
-        
-        italicBtn.addEventListener('click', () => {
-            document.execCommand('italic', false, null);
-            editor.focus();
-        });
-        
-        underlineBtn.addEventListener('click', () => {
-            document.execCommand('underline', false, null);
-            editor.focus();
-        });
-        
-        alignLeftBtn.addEventListener('click', () => {
-            document.execCommand('justifyLeft', false, null);
-            editor.focus();
-        });
-        
-        alignCenterBtn.addEventListener('click', () => {
-            document.execCommand('justifyCenter', false, null);
-            editor.focus();
-        });
-        
-        alignRightBtn.addEventListener('click', () => {
-            document.execCommand('justifyRight', false, null);
-            editor.focus();
-        });
-        
-        justifyBtn.addEventListener('click', () => {
-            document.execCommand('justifyFull', false, null);
-            editor.focus();
-        });
-        
-        bulletListBtn.addEventListener('click', () => {
-            document.execCommand('insertUnorderedList', false, null);
-            editor.focus();
-        });
-        
-        numberedListBtn.addEventListener('click', () => {
-            document.execCommand('insertOrderedList', false, null);
-            editor.focus();
-        });
-        
-        indentBtn.addEventListener('click', () => {
-            document.execCommand('indent', false, null);
-            editor.focus();
-        });
-        
-        outdentBtn.addEventListener('click', () => {
-            document.execCommand('outdent', false, null);
-            editor.focus();
-        });
-        
-        insertLinkBtn.addEventListener('click', () => {
-            linkModal.classList.add('active');
-        });
-        
-        insertImageBtn.addEventListener('click', () => {
-            const url = prompt('Enter image URL:');
-            if (url) {
-                document.execCommand('insertImage', false, url);
-            }
-            editor.focus();
-        });
-        
-        insertTableBtn.addEventListener('click', () => {
-            const rows = prompt('Enter number of rows:', '2');
-            const cols = prompt('Enter number of columns:', '2');
-            if (rows && cols) {
-                document.execCommand('insertTable', false, `${rows}x${cols}`);
-            }
-            editor.focus();
-        });
-        
-        // File operations
-        uploadDocBtn.addEventListener('click', () => {
-            uploadModal.classList.add('active');
-        });
-        
-        downloadDocBtn.addEventListener('click', () => {
-            const content = editor.innerHTML;
-            const blob = new Blob([content], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'document.html';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
-        
-        printDocBtn.addEventListener('click', () => {
-            const originalContent = editor.innerHTML;
-            const printContent = originalContent.replace(/style="[^"]*"/g, '');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching functionality
+            const tabs = document.querySelectorAll('.tab');
+            const editors = document.querySelectorAll('.editor');
             
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Print Document</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
-                        h1 { font-size: 24px; }
-                        h2 { font-size: 20px; }
-                        p { margin-bottom: 10px; }
-                    </style>
-                </head>
-                <body>
-                    ${printContent}
-                    <script>
-                        window.onload = function() {
-                            window.print();
-                            window.onafterprint = function() {
-                                window.close();
-                            }
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.getAttribute('data-target');
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Show active editor
+                    editors.forEach(editor => {
+                        editor.classList.remove('active');
+                        if (editor.id === target) {
+                            editor.classList.add('active');
                         }
-                    <\/script>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-        });
-        
-        newDocBtn.addEventListener('click', () => {
-            if (confirm('Create a new document? Any unsaved changes will be lost.')) {
-                editor.innerHTML = '<h1>New Document</h1><p>Start typing here...</p>';
-                updateWordCount();
-            }
-        });
-        
-        saveDocBtn.addEventListener('click', () => {
-            // In a real application, this would save to a server
-            alert('Document saved successfully!');
-        });
-        
-        // Modal functionality
-        confirmUpload.addEventListener('click', () => {
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
-                        editor.innerHTML = `<p>${e.target.result}</p>`;
-                    } else if (file.type === 'text/html' || file.name.endsWith('.html')) {
-                        editor.innerHTML = e.target.result;
-                    } else {
-                        alert('Unsupported file format. Please upload a TXT or HTML file.');
-                    }
-                    updateWordCount();
-                };
-                
-                reader.readAsText(file);
-                uploadModal.classList.remove('active');
-            }
-        });
-        
-        insertLink.addEventListener('click', () => {
-            const url = document.getElementById('linkUrl').value;
-            const text = document.getElementById('linkText').value || url;
+                    });
+                });
+            });
             
-            if (url) {
-                document.execCommand('createLink', false, url);
-                // If text was provided, replace the selected text with the provided text
-                if (text && text !== url) {
-                    const sel = window.getSelection();
-                    if (sel.rangeCount) {
-                        const range = sel.getRangeAt(0);
-                        range.deleteContents();
-                        range.insertNode(document.createTextNode(text));
+            // Simulate spreadsheet formulas (simplified)
+            const cells = document.querySelectorAll('.cell[contenteditable="true"]');
+            cells.forEach(cell => {
+                cell.addEventListener('blur', () => {
+                    if (cell.textContent.startsWith('=')) {
+                        // Very simple formula simulation
+                        const formula = cell.textContent.substring(1);
+                        if (formula === 'SUM(B2:E2)') {
+                            // Calculate the sum of B2 to E2
+                            let sum = 0;
+                            for (let i = 1; i <= 4; i++) {
+                                const cellValue = document.querySelector(`.sheet-grid div:nth-child(${11 + i})`).textContent;
+                                sum += parseInt(cellValue) || 0;
+                            }
+                            cell.textContent = sum;
+                        } else if (formula === '((E2-B2)/B2)') {
+                            const b2 = parseInt(document.querySelector('.sheet-grid div:nth-child(12)').textContent) || 0;
+                            const e2 = parseInt(document.querySelector('.sheet-grid div:nth-child(15)').textContent) || 0;
+                            const growth = ((e2 - b2) / b2 * 100).toFixed(2);
+                            cell.textContent = growth + '%';
+                        }
                     }
-                }
-            }
+                });
+            });
             
-            linkModal.classList.remove('active');
-            editor.focus();
-        });
-        
-        // Close modals
-        cancelUpload.addEventListener('click', () => {
-            uploadModal.classList.remove('active');
-        });
-        
-        cancelLink.addEventListener('click', () => {
-            linkModal.classList.remove('active');
-        });
-        
-        modalCloses.forEach(close => {
-            close.addEventListener('click', () => {
-                uploadModal.classList.remove('active');
-                linkModal.classList.remove('active');
+            // Add basic formatting buttons functionality
+            const boldBtn = document.querySelector('.tool-btn:nth-child(1)');
+            const italicBtn = document.querySelector('.tool-btn:nth-child(2)');
+            const underlineBtn = document.querySelector('.tool-btn:nth-child(3)');
+            
+            boldBtn.addEventListener('click', () => {
+                document.execCommand('bold', false, null);
+            });
+            
+            italicBtn.addEventListener('click', () => {
+                document.execCommand('italic', false, null);
+            });
+            
+            underlineBtn.addEventListener('click', () => {
+                document.execCommand('underline', false, null);
             });
         });
-        
-        // Update word count as user types
-        editor.addEventListener('input', updateWordCount);
-        
-        // Word count function
-        function updateWordCount() {
-            const text = editor.innerText || '';
-            const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
-            wordCountElement.textContent = words;
-        }
-        
-        // Enable undo/redo functionality
-        let history = [editor.innerHTML];
-        let historyIndex = 0;
-        
-        editor.addEventListener('input', () => {
-            // Only save history if content has actually changed
-            if (history[historyIndex] !== editor.innerHTML) {
-                history = history.slice(0, historyIndex + 1);
-                history.push(editor.innerHTML);
-                historyIndex++;
-            }
-        });
-        
-        undoBtn.addEventListener('click', () => {
-            if (historyIndex > 0) {
-                historyIndex--;
-                editor.innerHTML = history[historyIndex];
-                updateWordCount();
-            }
-        });
-        
-        redoBtn.addEventListener('click', () => {
-            if (historyIndex < history.length - 1) {
-                historyIndex++;
-                editor.innerHTML = history[historyIndex];
-                updateWordCount();
-            }
-        });
-        
-        // Initialize with focus on editor
-        editor.focus();
     </script>
 </body>
 </html>
