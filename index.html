@@ -4,11 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Realistic Dark Office Suite</title>
+
+<!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Quill for Word-like editor -->
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<!-- XLSX for Excel -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- jsPDF for PDF export -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
 body{background:#1e1e2f;color:#f0f0f0;font-family:'Inter',sans-serif;margin:0;padding:0;}
 .container{padding:1rem;max-width:1400px;margin:auto;}
@@ -36,6 +45,7 @@ button:hover,select:hover,input:hover{background:#3b3b5c;}
 <div class="container">
 <h1 class="text-2xl mb-2 text-center">🖥 Realistic Dark Office Suite</h1>
 
+<!-- Action Buttons -->
 <div class="flex flex-wrap gap-2 justify-center mb-2">
   <button id="newText">New Word</button>
   <button id="newExcel">New Excel</button>
@@ -46,9 +56,11 @@ button:hover,select:hover,input:hover{background:#3b3b5c;}
   <button id="clearBtn">Clear</button>
 </div>
 
+<!-- Drag & Drop -->
 <div id="dragDrop" class="drag-drop mb-2">Drag & Drop Files Here or Tap to Browse</div>
 <input type="file" id="fileInput" multiple style="display:none;"/>
 
+<!-- Tabs -->
 <div class="tabs mb-2 flex flex-wrap justify-center">
   <button class="active" data-tab="textTab">Word</button>
   <button data-tab="excelTab">Excel</button>
@@ -79,14 +91,13 @@ button:hover,select:hover,input:hover{background:#3b3b5c;}
     <select class="ql-align"></select>
   </div>
 </div>
-
 <div id="textTab" class="editor-container" style="display:block;"></div>
 
-<!-- Excel Editor -->
+<!-- Excel -->
 <input type="text" id="excelFormula" class="formula-bar" placeholder="Formula Bar" style="display:none;">
 <div id="excelTab" class="excel-container" style="display:none;"></div>
 
-<!-- PDF Editor -->
+<!-- PDF -->
 <div id="pdfTab" class="pdf-editor" contenteditable="true" style="display:none;"></div>
 </div>
 
@@ -110,7 +121,7 @@ tabs.forEach(tab=>tab.addEventListener('click',()=>{
 // Quill Word Editor
 const quill=new Quill('#textTab',{theme:'snow',modules:{toolbar:'#wordToolbar'}});
 
-// File Handling
+// File Upload
 const fileInput=document.getElementById('fileInput');
 const dragDrop=document.getElementById('dragDrop');
 dragDrop.addEventListener('click',()=>fileInput.click());
