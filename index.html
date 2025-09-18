@@ -3,21 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultimate Dark Document Editor & Viewer</title>
+<title>Ultimate Dark Document Suite</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-
-<!-- Quill for Text/Word Editor -->
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-
-<!-- PDF.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.8.162/pdf.min.js"></script>
-
-<!-- SheetJS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-<!-- Mammoth.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
 
 <style>
@@ -30,46 +22,59 @@ button:hover { background-color: #2563eb; }
 .pdf-controls, .excel-controls { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .drag-drop { border: 2px dashed #3b82f6; padding: 2rem; border-radius: 0.5rem; text-align: center; cursor: pointer; margin-bottom: 1rem; transition:0.2s; }
 .drag-drop:hover { background-color: #3b3b5c; }
-.ql-toolbar.ql-snow { background-color: #3b3b5c; border: 1px solid #444; color: #f0f0f0; }
-.ql-container.ql-snow { background-color: #2b2b3b; color: #f0f0f0; border: 1px solid #444; }
-.ql-picker-label, .ql-picker-item { color:#f0f0f0 !important; }
-.ql-stroke { stroke:#f0f0f0 !important; }
-.ql-fill { fill:#f0f0f0 !important; }
-.excel-container table { width: 100%; border-collapse: collapse; }
+.ql-toolbar.ql-snow { background-color: #3b3b5c; border: 1px solid #444; color: #f0f0f0; flex-wrap: wrap; }
+.ql-container.ql-snow { background-color: #2b2b3b; color: #f0f0f0; border: 1px solid #444; min-height:200px; }
+.ql-picker-label, .ql-picker-item, .ql-stroke, .ql-fill { color:#f0f0f0 !important; }
+.excel-container table { width: 100%; border-collapse: collapse; display:block; overflow:auto; }
 .excel-container td, .excel-container th { border: 1px solid #555; padding: 0.3rem; color: #f0f0f0; background-color: #2b2b3b; }
 .excel-container td:focus { outline: 2px solid #3b82f6; background-color: #3b3b5c; }
-.pdf-wrapper { display:flex; gap:10px; }
-.pdf-thumbnails { width:100px; overflow-y:auto; border:1px solid #444; background:#2b2b3b; padding:5px; border-radius:5px; }
+.pdf-wrapper { display:flex; gap:10px; flex-wrap:wrap; }
+.pdf-thumbnails { width:100px; overflow-x:auto; overflow-y:auto; border:1px solid #444; background:#2b2b3b; padding:5px; border-radius:5px; display:flex; flex-direction:column; }
 .pdf-thumbnails canvas { width:100%; cursor:pointer; margin-bottom:5px; border:2px solid #444; border-radius:3px; }
 .pdf-thumbnails canvas.active { border:2px solid #3b82f6; }
-.pdf-viewer { flex:1; }
+.pdf-viewer { flex:1; min-width:200px; }
+@media(max-width:768px){
+  .pdf-wrapper{flex-direction:column;}
+  .pdf-thumbnails{flex-direction:row;width:100%; height:100px; overflow-x:auto; overflow-y:hidden;}
+  .pdf-thumbnails canvas{width:auto;height:100%; margin-right:5px; margin-bottom:0;}
+  .ql-toolbar.ql-snow{flex-wrap:wrap;}
+}
 </style>
 </head>
-<body class="p-5">
+<body class="p-3 md:p-5">
 
-<h1 class="text-2xl mb-4">🗂 Ultimate Dark Document Editor & Viewer</h1>
+<h1 class="text-2xl mb-4 text-center">🗂 Ultimate Dark Document Suite</h1>
+
+<!-- Action Buttons -->
+<div class="flex flex-wrap gap-2 justify-center mb-4">
+  <button id="newText">New Text</button>
+  <button id="newExcel">New Excel</button>
+  <button id="newPDF">New PDF</button>
+  <button id="uploadBtn">Upload</button>
+  <button id="downloadBtn">Download</button>
+  <button id="printBtn">Print</button>
+  <button id="clearBtn">Clear</button>
+</div>
 
 <!-- Drag and Drop Upload -->
-<div id="dragDrop" class="drag-drop mb-4">
-  Drag & Drop Files Here or Click to Browse
-</div>
+<div id="dragDrop" class="drag-drop mb-4">Drag & Drop Files Here or Tap to Browse</div>
 <input type="file" id="fileInput" multiple style="display:none;"/>
 
 <!-- Tabs -->
-<div class="tabs mb-4">
+<div class="tabs mb-4 flex flex-wrap justify-center">
   <button class="active" data-tab="textTab">Text/Word</button>
   <button data-tab="pdfTab">PDF</button>
   <button data-tab="excelTab">Excel/CSV</button>
 </div>
 
-<!-- Editors/Viewer -->
+<!-- Editors -->
 <div id="textTab" class="editor-container"></div>
 
 <div id="pdfContainer" style="display:none;" class="pdf-wrapper">
   <div class="pdf-thumbnails" id="pdfThumbnails"></div>
   <div class="pdf-viewer">
     <canvas id="pdfTab" class="pdf-container"></canvas>
-    <div class="pdf-controls">
+    <div class="pdf-controls flex flex-wrap gap-2 mt-2 justify-center">
       <button id="prevPage">⬅ Prev</button>
       <span id="pageInfo">1 / 1</span>
       <button id="nextPage">Next ➡</button>
@@ -80,17 +85,11 @@ button:hover { background-color: #2563eb; }
 </div>
 
 <div id="excelTab" class="excel-container" style="display:none;"></div>
-<div class="excel-controls">
+<div class="excel-controls flex flex-wrap gap-2 mt-2 justify-center">
   <button id="addRow">Add Row</button>
   <button id="addCol">Add Column</button>
   <button id="deleteRow">Delete Last Row</button>
   <button id="deleteCol">Delete Last Column</button>
-</div>
-
-<!-- Action Buttons -->
-<div class="mb-4 mt-2">
-  <button id="downloadBtn">Download</button>
-  <button id="printBtn">Print</button>
 </div>
 
 <script>
@@ -104,7 +103,7 @@ tabs.forEach(tab => tab.addEventListener('click', () => {
   tabContents[tab.dataset.tab].style.display='block';
 }));
 
-// Initialize Quill Editor
+// Quill editor
 const quill = new Quill('#textTab', {
   theme:'snow',
   modules:{ toolbar: [
@@ -114,20 +113,21 @@ const quill = new Quill('#textTab', {
     [{ 'align': [] }],
     ['link','image','video'],
     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    [{ 'header': [1,2,3,4,5,6,false] }, 'blockquote', 'code-block'],
     ['clean']
   ]}
 });
 
-// File Handling
+// File handling
 const fileInput = document.getElementById('fileInput');
 const dragDrop = document.getElementById('dragDrop');
 let currentPDF=null, currentPDFData=null, pdfPageNum=1, pdfScale=1.5;
 
 dragDrop.addEventListener('click', ()=>fileInput.click());
-dragDrop.addEventListener('dragover', (e)=>{ e.preventDefault(); dragDrop.style.backgroundColor='#3b3b5c'; });
+dragDrop.addEventListener('dragover', e=>{ e.preventDefault(); dragDrop.style.backgroundColor='#3b3b5c'; });
 dragDrop.addEventListener('dragleave', ()=>{ dragDrop.style.backgroundColor='#2b2b3b'; });
-dragDrop.addEventListener('drop', (e)=>{ e.preventDefault(); dragDrop.style.backgroundColor='#2b2b3b'; handleFiles(e.dataTransfer.files); });
-fileInput.addEventListener('change', (e)=> handleFiles(e.target.files));
+dragDrop.addEventListener('drop', e=>{ e.preventDefault(); dragDrop.style.backgroundColor='#2b2b3b'; handleFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', e=> handleFiles(e.target.files));
 
 async function handleFiles(files){
   for(let file of files){
@@ -164,10 +164,30 @@ async function handleFiles(files){
   }
 }
 
-// PDF Rendering
+// New Document Buttons
+document.getElementById('newText').addEventListener('click', ()=>{ quill.setText(''); tabs[0].click(); });
+document.getElementById('newExcel').addEventListener('click', ()=>{
+  tabs[2].click();
+  tabContents.excelTab.innerHTML='<table><tr><th>Header 1</th><th>Header 2</th></tr><tr><td contenteditable=true></td><td contenteditable=true></td></tr></table>';
+});
+document.getElementById('newPDF').addEventListener('click', async ()=>{
+  tabs[1].click();
+  const canvas = document.getElementById('pdfTab');
+  const ctx = canvas.getContext('2d');
+  canvas.width = 600; canvas.height = 800;
+  ctx.fillStyle = "#2b2b3b";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#f0f0f0"; ctx.font="20px Arial";
+  ctx.fillText("New PDF Document Placeholder",50,50);
+  currentPDF=null; currentPDFData=null; pdfPageNum=1;
+});
+
+// PDF rendering and thumbnail functions
 const pdfCanvas=document.getElementById('pdfTab');
 const pdfCtx=pdfCanvas.getContext('2d');
 const pageInfo=document.getElementById('pageInfo');
+const pdfThumbContainer=document.getElementById('pdfThumbnails');
+
 async function renderPDF(){
   if(!currentPDF) return;
   const page=await currentPDF.getPage(pdfPageNum);
@@ -177,17 +197,13 @@ async function renderPDF(){
   await page.render({canvasContext:pdfCtx,viewport}).promise;
   pageInfo.textContent=pdfPageNum+' / '+currentPDF.numPages;
 }
-
-// PDF Thumbnails
-const pdfThumbContainer=document.getElementById('pdfThumbnails');
 async function renderPDFThumbnails(){
   pdfThumbContainer.innerHTML='';
   for(let i=1;i<=currentPDF.numPages;i++){
     const page=await currentPDF.getPage(i);
     const viewport=page.getViewport({scale:0.2});
     const canvas=document.createElement('canvas');
-    canvas.width=viewport.width;
-    canvas.height=viewport.height;
+    canvas.width=viewport.width; canvas.height=viewport.height;
     const ctx=canvas.getContext('2d');
     await page.render({canvasContext:ctx,viewport}).promise;
     if(i===pdfPageNum) canvas.classList.add('active');
@@ -230,6 +246,11 @@ document.getElementById('printBtn').addEventListener('click', ()=>{
   else if(activeTab==='excelTab'){ printWindow.document.write('<html><body style="background:#1e1e2f;color:#f0f0f0;">'+excelTab.innerHTML+'</body></html>'); }
   else if(activeTab==='pdfTab' && currentPDFData){ const blob=new Blob([currentPDFData],{type:'application/pdf'}); printWindow.location.href=URL.createObjectURL(blob);}
   printWindow.document.close(); printWindow.print();
+});
+
+// Clear
+document.getElementById('clearBtn').addEventListener('click', ()=>{
+  quill.setText(''); excelTab.innerHTML=''; const ctx=pdfCanvas.getContext('2d'); ctx.clearRect(0,0,pdfCanvas.width,pdfCanvas.height);
 });
 </script>
 
