@@ -13,9 +13,23 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3d3d3d;
+            --text-primary: #f0f0f0;
+            --text-secondary: #b0b0b0;
+            --accent: #4a86e8;
+            --accent-hover: #3a76d8;
+            --border: #444;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+        }
+        
         body {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: #333;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: var(--text-primary);
             min-height: 100vh;
             padding: 20px;
         }
@@ -23,19 +37,20 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
+            background: var(--bg-primary);
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             overflow: hidden;
         }
         
         header {
-            background: #2c3e50;
-            color: white;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
             padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid var(--border);
         }
         
         .logo {
@@ -47,38 +62,60 @@
         }
         
         .logo i {
-            color: #3498db;
+            color: var(--accent);
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: none;
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .tabs {
             display: flex;
-            background: #ecf0f1;
-            border-bottom: 1px solid #ddd;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
         }
         
         .tab {
             padding: 12px 24px;
             cursor: pointer;
             font-weight: 600;
-            border-right: 1px solid #ddd;
+            border-right: 1px solid var(--border);
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .tab.active {
-            background: white;
-            border-bottom: 3px solid #3498db;
+            background: var(--bg-primary);
+            border-bottom: 3px solid var(--accent);
         }
         
         .tab:hover {
-            background: #d6dbdf;
+            background: var(--bg-tertiary);
         }
         
         .toolbar {
             padding: 10px 20px;
-            background: #f8f9fa;
+            background: var(--bg-secondary);
             display: flex;
             gap: 15px;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid var(--border);
             flex-wrap: wrap;
         }
         
@@ -86,7 +123,7 @@
             display: flex;
             gap: 5px;
             padding-right: 15px;
-            border-right: 1px solid #ddd;
+            border-right: 1px solid var(--border);
             align-items: center;
         }
         
@@ -98,8 +135,9 @@
             padding: 8px 12px;
             border-radius: 4px;
             cursor: pointer;
-            background: white;
-            border: 1px solid #ddd;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
             display: flex;
             align-items: center;
             gap: 5px;
@@ -107,8 +145,8 @@
         }
         
         .tool-btn:hover {
-            background: #e3f2fd;
-            border-color: #3498db;
+            background: var(--accent);
+            border-color: var(--accent);
         }
         
         .editor-area {
@@ -121,6 +159,7 @@
             flex: 1;
             padding: 20px;
             overflow: auto;
+            background: var(--bg-primary);
         }
         
         .editor.active {
@@ -138,19 +177,22 @@
         
         .sheet-grid {
             display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            border: 1px solid #ddd;
+            grid-template-columns: 50px repeat(10, 1fr);
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
         }
         
         .cell {
             padding: 8px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border);
             min-height: 40px;
             outline: none;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
         }
         
         .cell.header {
-            background: #f2f2f2;
+            background: var(--bg-tertiary);
             font-weight: bold;
             text-align: center;
         }
@@ -160,14 +202,14 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: #f0f0f0;
+            background: var(--bg-secondary);
         }
         
         .slide-container {
             width: 80%;
             height: 350px;
-            background: white;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background: var(--bg-tertiary);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             border-radius: 8px;
             padding: 30px;
             text-align: center;
@@ -176,12 +218,13 @@
         .slide-title {
             font-size: 32px;
             margin-bottom: 20px;
-            color: #2c3e50;
+            color: var(--text-primary);
         }
         
         .slide-content {
             font-size: 18px;
             line-height: 1.6;
+            color: var(--text-secondary);
         }
         
         .slide-nav {
@@ -192,33 +235,45 @@
         
         .status-bar {
             padding: 8px 20px;
-            background: #2c3e50;
-            color: white;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
             display: flex;
             justify-content: space-between;
             font-size: 14px;
+            border-top: 1px solid var(--border);
         }
         
         .zoom-controls {
             display: flex;
             gap: 10px;
+            align-items: center;
         }
         
         .zoom-btn {
-            background: none;
+            background: var(--bg-tertiary);
             border: none;
-            color: white;
+            color: var(--text-primary);
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .zoom-btn:hover {
+            background: var(--accent);
         }
         
         h1 {
             margin-bottom: 15px;
-            color: #2c3e50;
+            color: var(--text-primary);
         }
         
         p {
             margin-bottom: 15px;
+            color: var(--text-secondary);
         }
         
         .content-area {
@@ -227,16 +282,151 @@
         
         .btn {
             padding: 10px 15px;
-            background: #3498db;
+            background: var(--accent);
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
         .btn:hover {
-            background: #2980b9;
+            background: var(--accent-hover);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-tertiary);
+        }
+        
+        .btn-secondary:hover {
+            background: #4d4d4d;
+        }
+        
+        .file-upload {
+            display: none;
+        }
+        
+        .upload-btn {
+            cursor: pointer;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .recent-files {
+            margin-top: 20px;
+            padding: 20px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .recent-files h3 {
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+        
+        .file-list {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .file-item {
+            background: var(--bg-tertiary);
+            padding: 15px;
+            border-radius: 8px;
+            width: 150px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-item:hover {
+            background: var(--accent);
+        }
+        
+        .file-icon {
+            font-size: 36px;
+            text-align: center;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+        
+        .file-item:hover .file-icon {
+            color: white;
+        }
+        
+        .file-name {
+            text-align: center;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .light-theme {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f0f0f0;
+            --bg-tertiary: #e0e0e0;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --accent: #4a86e8;
+            --accent-hover: #3a76d8;
+            --border: #cccccc;
         }
         
         @media (max-width: 768px) {
@@ -255,6 +445,14 @@
                 height: auto;
                 min-height: 400px;
             }
+            
+            .header-controls {
+                display: none;
+            }
+            
+            .mobile-menu {
+                display: block;
+            }
         }
     </style>
 </head>
@@ -265,37 +463,63 @@
                 <i class="fas fa-file-alt"></i>
                 <span>UniDoc Suite</span>
             </div>
-            <div class="user-info">
-                <i class="fas fa-user-circle"></i>
-                <span>User</span>
+            <div class="header-controls">
+                <button class="theme-toggle" id="theme-toggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn" id="new-btn">
+                    <i class="fas fa-plus"></i> New
+                </button>
+                <button class="btn btn-secondary" id="open-btn">
+                    <i class="fas fa-folder-open"></i> Open
+                </button>
+                <button class="btn" id="save-btn">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <input type="file" id="file-upload" class="file-upload" accept=".docx,.xlsx,.pptx,.txt,.csv">
             </div>
         </header>
         
         <div class="tabs">
-            <div class="tab active" data-target="word-editor">Document</div>
-            <div class="tab" data-target="spreadsheet-editor">Spreadsheet</div>
-            <div class="tab" data-target="slides-editor">Presentation</div>
+            <div class="tab active" data-target="word-editor">
+                <i class="fas fa-file-word"></i> Document
+            </div>
+            <div class="tab" data-target="spreadsheet-editor">
+                <i class="fas fa-table"></i> Spreadsheet
+            </div>
+            <div class="tab" data-target="slides-editor">
+                <i class="fas fa-presentation-screen"></i> Presentation
+            </div>
         </div>
         
         <div class="toolbar">
             <div class="tool-group">
                 <button class="tool-btn"><i class="fas fa-save"></i> Save</button>
                 <button class="tool-btn"><i class="fas fa-file-export"></i> Export</button>
+                <button class="tool-btn"><i class="fas fa-print"></i> Print</button>
             </div>
             <div class="tool-group">
                 <button class="tool-btn"><i class="fas fa-bold"></i></button>
                 <button class="tool-btn"><i class="fas fa-italic"></i></button>
                 <button class="tool-btn"><i class="fas fa-underline"></i></button>
+                <button class="tool-btn"><i class="fas fa-font"></i></button>
             </div>
             <div class="tool-group">
                 <button class="tool-btn"><i class="fas fa-align-left"></i></button>
                 <button class="tool-btn"><i class="fas fa-align-center"></i></button>
                 <button class="tool-btn"><i class="fas fa-align-right"></i></button>
+                <button class="tool-btn"><i class="fas fa-list-ul"></i></button>
+                <button class="tool-btn"><i class="fas fa-list-ol"></i></button>
             </div>
             <div class="tool-group">
                 <button class="tool-btn"><i class="fas fa-image"></i> Image</button>
                 <button class="tool-btn"><i class="fas fa-table"></i> Table</button>
                 <button class="tool-btn"><i class="fas fa-chart-bar"></i> Chart</button>
+                <button class="tool-btn"><i class="fas fa-link"></i> Link</button>
+            </div>
+            <div class="tool-group">
+                <button class="tool-btn"><i class="fas fa-undo"></i></button>
+                <button class="tool-btn"><i class="fas fa-redo"></i></button>
             </div>
         </div>
         
@@ -314,16 +538,17 @@
             
             <div id="spreadsheet-editor" class="editor">
                 <div class="sheet-grid">
-                    <div class="cell header">A1</div>
-                    <div class="cell header">B1</div>
-                    <div class="cell header">C1</div>
-                    <div class="cell header">D1</div>
-                    <div class="cell header">E1</div>
-                    <div class="cell header">F1</div>
-                    <div class="cell header">G1</div>
-                    <div class="cell header">H1</div>
-                    <div class="cell header">I1</div>
-                    <div class="cell header">J1</div>
+                    <div class="cell header"></div>
+                    <div class="cell header">A</div>
+                    <div class="cell header">B</div>
+                    <div class="cell header">C</div>
+                    <div class="cell header">D</div>
+                    <div class="cell header">E</div>
+                    <div class="cell header">F</div>
+                    <div class="cell header">G</div>
+                    <div class="cell header">H</div>
+                    <div class="cell header">I</div>
+                    <div class="cell header">J</div>
                     
                     <div class="cell header">1</div>
                     <div class="cell" contenteditable="true">Q1 Sales</div>
@@ -332,6 +557,7 @@
                     <div class="cell" contenteditable="true">Q4 Sales</div>
                     <div class="cell" contenteditable="true">Total</div>
                     <div class="cell" contenteditable="true">Growth</div>
+                    <div class="cell" contenteditable="true"></div>
                     <div class="cell" contenteditable="true"></div>
                     <div class="cell" contenteditable="true"></div>
                     <div class="cell" contenteditable="true"></div>
@@ -346,6 +572,7 @@
                     <div class="cell" contenteditable="true"></div>
                     <div class="cell" contenteditable="true"></div>
                     <div class="cell" contenteditable="true"></div>
+                    <div class="cell" contenteditable="true"></div>
                     
                     <div class="cell header">3</div>
                     <div class="cell" contenteditable="true">Product A</div>
@@ -354,6 +581,7 @@
                     <div class="cell" contenteditable="true">11500</div>
                     <div class="cell" contenteditable="true">12000</div>
                     <div class="cell" contenteditable="true">=SUM(B3:E3)</div>
+                    <div class="cell" contenteditable="true"></div>
                     <div class="cell" contenteditable="true"></div>
                     <div class="cell" contenteditable="true"></div>
                     <div class="cell" contenteditable="true"></div>
@@ -376,11 +604,74 @@
         </div>
         
         <div class="status-bar">
-            <div class="page-info">Page 1 of 1</div>
+            <div class="page-info">Page 1 of 1 | Words: 42</div>
             <div class="zoom-controls">
                 <button class="zoom-btn"><i class="fas fa-search-minus"></i></button>
                 <span>100%</span>
                 <button class="zoom-btn"><i class="fas fa-search-plus"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="recent-files">
+        <h3>Recent Files</h3>
+        <div class="file-list">
+            <div class="file-item">
+                <div class="file-icon">
+                    <i class="fas fa-file-word"></i>
+                </div>
+                <div class="file-name">Annual Report.docx</div>
+            </div>
+            <div class="file-item">
+                <div class="file-icon">
+                    <i class="fas fa-table"></i>
+                </div>
+                <div class="file-name">Financials.xlsx</div>
+            </div>
+            <div class="file-item">
+                <div class="file-icon">
+                    <i class="fas fa-presentation-screen"></i>
+                </div>
+                <div class="file-name">Investor Deck.pptx</div>
+            </div>
+            <div class="file-item">
+                <div class="file-icon">
+                    <i class="fas fa-file-word"></i>
+                </div>
+                <div class="file-name">Project Plan.docx</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="open-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Open Document</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Select File Type</label>
+                <select class="form-control">
+                    <option>All Supported Formats</option>
+                    <option>Word Documents (.docx)</option>
+                    <option>Excel Spreadsheets (.xlsx)</option>
+                    <option>PowerPoint Presentations (.pptx)</option>
+                    <option>Text Files (.txt)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>From Location</label>
+                <select class="form-control">
+                    <option>My Computer</option>
+                    <option>OneDrive</option>
+                    <option>Google Drive</option>
+                    <option>Dropbox</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button class="btn" style="width: 100%">
+                    <i class="fas fa-folder-open"></i> Browse Files
+                </button>
             </div>
         </div>
     </div>
@@ -409,6 +700,49 @@
                 });
             });
             
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = themeToggle.querySelector('i');
+            
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+                if (document.body.classList.contains('light-theme')) {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                } else {
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                }
+            });
+            
+            // Open modal functionality
+            const openBtn = document.getElementById('open-btn');
+            const openModal = document.getElementById('open-modal');
+            const closeModal = document.querySelector('.close-modal');
+            
+            openBtn.addEventListener('click', () => {
+                openModal.style.display = 'flex';
+            });
+            
+            closeModal.addEventListener('click', () => {
+                openModal.style.display = 'none';
+            });
+            
+            // File upload functionality
+            const fileUpload = document.getElementById('file-upload');
+            const uploadBtn = document.querySelector('.upload-btn');
+            
+            uploadBtn.addEventListener('click', () => {
+                fileUpload.click();
+            });
+            
+            fileUpload.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    alert(`Selected file: ${e.target.files[0].name}`);
+                    // Here you would handle the file upload process
+                }
+            });
+            
             // Simulate spreadsheet formulas (simplified)
             const cells = document.querySelectorAll('.cell[contenteditable="true"]');
             cells.forEach(cell => {
@@ -420,24 +754,31 @@
                             // Calculate the sum of B2 to E2
                             let sum = 0;
                             for (let i = 1; i <= 4; i++) {
-                                const cellValue = document.querySelector(`.sheet-grid div:nth-child(${11 + i})`).textContent;
+                                const cellValue = document.querySelector(`.sheet-grid div:nth-child(${12 + i})`).textContent;
                                 sum += parseInt(cellValue) || 0;
                             }
                             cell.textContent = sum;
                         } else if (formula === '((E2-B2)/B2)') {
-                            const b2 = parseInt(document.querySelector('.sheet-grid div:nth-child(12)').textContent) || 0;
-                            const e2 = parseInt(document.querySelector('.sheet-grid div:nth-child(15)').textContent) || 0;
+                            const b2 = parseInt(document.querySelector('.sheet-grid div:nth-child(13)').textContent) || 0;
+                            const e2 = parseInt(document.querySelector('.sheet-grid div:nth-child(16)').textContent) || 0;
                             const growth = ((e2 - b2) / b2 * 100).toFixed(2);
                             cell.textContent = growth + '%';
+                        } else if (formula === 'SUM(B3:E3)') {
+                            let sum = 0;
+                            for (let i = 1; i <= 4; i++) {
+                                const cellValue = document.querySelector(`.sheet-grid div:nth-child(${23 + i})`).textContent;
+                                sum += parseInt(cellValue) || 0;
+                            }
+                            cell.textContent = sum;
                         }
                     }
                 });
             });
             
             // Add basic formatting buttons functionality
-            const boldBtn = document.querySelector('.tool-btn:nth-child(1)');
-            const italicBtn = document.querySelector('.tool-btn:nth-child(2)');
-            const underlineBtn = document.querySelector('.tool-btn:nth-child(3)');
+            const boldBtn = document.querySelectorAll('.tool-btn')[3];
+            const italicBtn = document.querySelectorAll('.tool-btn')[4];
+            const underlineBtn = document.querySelectorAll('.tool-btn')[5];
             
             boldBtn.addEventListener('click', () => {
                 document.execCommand('bold', false, null);
@@ -449,6 +790,35 @@
             
             underlineBtn.addEventListener('click', () => {
                 document.execCommand('underline', false, null);
+            });
+            
+            // Zoom functionality
+            const zoomInBtn = document.querySelectorAll('.zoom-btn')[1];
+            const zoomOutBtn = document.querySelectorAll('.zoom-btn')[0];
+            const zoomLevel = document.querySelector('.zoom-controls span');
+            
+            let currentZoom = 100;
+            
+            zoomInBtn.addEventListener('click', () => {
+                if (currentZoom < 150) {
+                    currentZoom += 10;
+                    zoomLevel.textContent = currentZoom + '%';
+                    document.querySelectorAll('.editor').forEach(editor => {
+                        editor.style.transform = `scale(${currentZoom/100})`;
+                        editor.style.transformOrigin = 'top left';
+                    });
+                }
+            });
+            
+            zoomOutBtn.addEventListener('click', () => {
+                if (currentZoom > 50) {
+                    currentZoom -= 10;
+                    zoomLevel.textContent = currentZoom + '%';
+                    document.querySelectorAll('.editor').forEach(editor => {
+                        editor.style.transform = `scale(${currentZoom/100})`;
+                        editor.style.transformOrigin = 'top left';
+                    });
+                }
             });
         });
     </script>
