@@ -1,225 +1,668 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document Editor, Creator & Viewer</title>
+    <title>NexDoc - Modern Document Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <style>
         :root {
-            --hue: 210; /* Blue */
-            --accent-hue: 25; /* Orange */
-            --text-color-normal: hsl(var(--hue), 10%, 62%);
-            --text-color-light: hsl(var(--hue), 15%, 35%);
-            --text-color-richer: hsl(var(--hue), 50%, 72%);
-            --text-color-highlight: hsl(var(--accent-hue), 70%, 45%);
-            --link-color: hsl(var(--hue), 90%, 70%);
-            --accent-color: hsl(var(--accent-hue), 100%, 70%);
-            --error-color: rgb(240, 50, 50);
-            --button-background: hsl(var(--hue), 63%, 43%);
-            --button-text-color: black;
-            --background: hsl(var(--hue), 20%, 12%);
-            --editor-bg: hsl(var(--hue), 15%, 18%);
-            --border-color: hsl(var(--hue), 10%, 25%);
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3d3d3d;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --accent: #4a86e8;
+            --accent-hover: #5a96f8;
+            --danger: #e84a4a;
+            --success: #4ae84a;
+            --border: #555555;
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background: var(--background);
-            color: var(--text-color-normal);
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            margin: 0;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        #toolbar {
-            background: var(--editor-bg);
+        .header {
+            background-color: var(--bg-secondary);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .logo i {
+            color: var(--accent);
+        }
+
+        .menu-bar {
+            background-color: var(--bg-secondary);
+            padding: 8px 20px;
+            display: flex;
+            gap: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .menu-item {
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .menu-item:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .toolbar {
+            background-color: var(--bg-tertiary);
+            padding: 10px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tool-group {
+            display: flex;
+            gap: 5px;
+            padding-right: 15px;
+            border-right: 1px solid var(--border);
+        }
+
+        .tool-group:last-child {
+            border-right: none;
+        }
+
+        .tool-btn {
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .tool-btn.active {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-btn {
+            background-color: transparent;
+            color: var(--text-primary);
+            border: none;
             padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-
-        #toolbar button, #toolbar select, #toolbar input {
-            background: var(--button-background);
-            color: var(--button-text-color);
-            border: none;
-            padding: 5px 10px;
-            margin: 0 2px;
+            border-radius: 4px;
+            text-align: left;
             cursor: pointer;
-            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.2s;
         }
 
-        #toolbar button:hover {
-            opacity: 0.9;
+        .sidebar-btn:hover {
+            background-color: var(--bg-tertiary);
         }
 
-        #editor {
-            background: var(--editor-bg);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            min-height: 400px;
-            border-radius: 5px;
-            color: var(--text-color-richer);
+        .editor-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        #viewer {
+        .format-bar {
+            background-color: var(--bg-tertiary);
+            padding: 10px 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .format-select {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .format-input {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 5px;
+            width: 60px;
+        }
+
+        .editor {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background-color: var(--bg-primary);
+            background-image: linear-gradient(var(--bg-tertiary) 1px, transparent 0),
+                              linear-gradient(90deg, var(--bg-tertiary) 1px, transparent 0);
+            background-size: 20px 20px;
+            background-position: center center;
+        }
+
+        .document {
+            background-color: var(--bg-secondary);
+            min-height: 842px;
+            width: 595px;
+            margin: 0 auto;
+            padding: 40px;
+            box-shadow: 0 0 20px var(--shadow);
+            border-radius: 4px;
+        }
+
+        .document-content {
+            min-height: 100%;
+            outline: none;
+        }
+
+        .status-bar {
+            background-color: var(--bg-secondary);
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 600px;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            display: none;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
         }
 
-        #controls {
-            margin-top: 20px;
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
         }
 
-        #controls button, #controls input, #controls select {
-            background: var(--button-background);
-            color: var(--button-text-color);
+        .modal-content {
+            background-color: var(--bg-secondary);
+            width: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            background-color: var(--bg-tertiary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .modal-close {
+            background: none;
             border: none;
-            padding: 5px 10px;
-            margin: 0 5px;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
             cursor: pointer;
-            border-radius: 3px;
         }
 
-        @media print {
-            #toolbar, #controls {
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+
+        .modal-btn {
+            padding: 10px 15px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .modal-btn-primary {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .modal-btn-secondary {
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .modal-btn-secondary:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            background-color: var(--bg-tertiary);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .tab-container {
+            display: flex;
+            background-color: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-right: 1px solid var(--border);
+            transition: background-color 0.2s;
+        }
+
+        .tab.active {
+            background-color: var(--accent);
+        }
+
+        .tab:hover:not(.active) {
+            background-color: var(--bg-secondary);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .divider {
+            height: 1px;
+            background-color: var(--border);
+            margin: 10px 0;
+        }
+
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
                 display: none;
-            }
-            #editor {
-                border: none;
-                background: white;
-                color: black;
-            }
-            body {
-                background: white;
             }
         }
     </style>
 </head>
 <body>
-    <div id="toolbar">
-        <button onclick="format('bold')">Bold</button>
-        <button onclick="format('italic')">Italic</button>
-        <button onclick="format('underline')">Underline</button>
-        <button onclick="format('superscript')">Superscript</button>
-        <button onclick="format('subscript')">Subscript</button>
-        <button onclick="format('insertOrderedList')">Ordered List</button>
-        <button onclick="format('insertUnorderedList')">Unordered List</button>
-        <button onclick="format('justifyLeft')">Align Left</button>
-        <button onclick="format('justifyCenter')">Align Center</button>
-        <button onclick="format('justifyRight')">Align Right</button>
-        <select onchange="format('fontSize', this.value)">
-            <option value="">Size</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-        </select>
-        <input type="color" onchange="format('foreColor', this.value)" title="Text Color">
-        <button onclick="format('undo')">Undo</button>
-        <button onclick="format('redo')">Redo</button>
-        <button onclick="setUrl()">Insert Link</button>
-        <input id="txtFormatUrl" placeholder="Enter URL" style="background: var(--editor-bg); color: var(--text-color-normal); border: 1px solid var(--border-color);">
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-file-alt"></i>
+            <span>NexDoc Editor</span>
+        </div>
+        <div>
+            <button class="btn btn-secondary">
+                <i class="fas fa-question-circle"></i> Help
+            </button>
+        </div>
     </div>
-    <div id="editor" contenteditable="true"></div>
-    <iframe id="viewer"></iframe>
-    <div id="controls">
-        <input type="file" id="upload" onchange="loadFile()">
-        <button onclick="newDoc()">New Document</button>
-        <select id="saveFormat">
-            <option value="txt">TXT</option>
-            <option value="html">HTML</option>
-        </select>
-        <button onclick="saveFile()">Download</button>
-        <button onclick="exportToPDF()">Export to PDF (via Print)</button>
-        <button onclick="printDoc()">Print</button>
+
+    <div class="tab-container">
+        <div class="tab active">Document.docx</div>
+        <div class="tab">Report.pdf</div>
+        <div class="tab">Notes.txt</div>
+    </div>
+
+    <div class="menu-bar">
+        <div class="menu-item">File</div>
+        <div class="menu-item">Edit</div>
+        <div class="menu-item">View</div>
+        <div class="menu-item">Insert</div>
+        <div class="menu-item">Format</div>
+        <div class="menu-item">Tools</div>
+        <div class="menu-item">Help</div>
+    </div>
+
+    <div class="toolbar">
+        <div class="tool-group">
+            <button class="tool-btn" title="New"><i class="fas fa-plus"></i></button>
+            <button class="tool-btn" title="Open"><i class="fas fa-folder-open"></i></button>
+            <button class="tool-btn" title="Save"><i class="fas fa-save"></i></button>
+        </div>
+        <div class="tool-group">
+            <button class="tool-btn" title="Print"><i class="fas fa-print"></i></button>
+            <button class="tool-btn" title="Download"><i class="fas fa-download"></i></button>
+            <button class="tool-btn" title="Upload"><i class="fas fa-upload"></i></button>
+        </div>
+        <div class="tool-group">
+            <button class="tool-btn" title="Undo"><i class="fas fa-undo"></i></button>
+            <button class="tool-btn" title="Redo"><i class="fas fa-redo"></i></button>
+        </div>
+        <div class="tool-group">
+            <button class="tool-btn" title="Bold"><i class="fas fa-bold"></i></button>
+            <button class="tool-btn" title="Italic"><i class="fas fa-italic"></i></button>
+            <button class="tool-btn" title="Underline"><i class="fas fa-underline"></i></button>
+        </div>
+        <div class="tool-group">
+            <button class="tool-btn" title="Align Left"><i class="fas fa-align-left"></i></button>
+            <button class="tool-btn" title="Align Center"><i class="fas fa-align-center"></i></button>
+            <button class="tool-btn" title="Align Right"><i class="fas fa-align-right"></i></button>
+            <button class="tool-btn" title="Justify"><i class="fas fa-align-justify"></i></button>
+        </div>
+        <div class="tool-group">
+            <button class="tool-btn" title="Bullet List"><i class="fas fa-list-ul"></i></button>
+            <button class="tool-btn" title="Numbered List"><i class="fas fa-list-ol"></i></button>
+            <button class="tool-btn" title="Indent"><i class="fas fa-indent"></i></button>
+            <button class="tool-btn" title="Outdent"><i class="fas fa-outdent"></i></button>
+        </div>
+        <div class="tool-group">
+            <button class="tool-btn" title="Insert Image"><i class="fas fa-image"></i></button>
+            <button class="tool-btn" title="Insert Table"><i class="fas fa-table"></i></button>
+            <button class="tool-btn" title="Insert Link"><i class="fas fa-link"></i></button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Documents</div>
+                <button class="sidebar-btn">
+                    <i class="fas fa-file-word"></i> Document.docx
+                </button>
+                <button class="sidebar-btn">
+                    <i class="fas fa-file-pdf"></i> Report.pdf
+                </button>
+                <button class="sidebar-btn">
+                    <i class="fas fa-file-alt"></i> Notes.txt
+                </button>
+                <button class="sidebar-btn">
+                    <i class="fas fa-file-excel"></i> Data.xlsx
+                </button>
+                <button class="sidebar-btn">
+                    <i class="fas fa-file-powerpoint"></i> Presentation.pptx
+                </button>
+            </div>
+            <div class="divider"></div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">Recent</div>
+                <button class="sidebar-btn">
+                    <i class="fas fa-file-word"></i> Project.docx
+                </button>
+                <button class="sidebar-btn">
+                    <i class="fas fa-file-pdf"></i> Manual.pdf
+                </button>
+                <button class="sidebar-btn">
+                    <i class="fas fa-file-alt"></i> Ideas.txt
+                </button>
+            </div>
+        </div>
+
+        <div class="editor-container">
+            <div class="format-bar">
+                <select class="format-select">
+                    <option>Normal</option>
+                    <option>Heading 1</option>
+                    <option>Heading 2</option>
+                    <option>Heading 3</option>
+                    <option>Title</option>
+                    <option>Subtitle</option>
+                </select>
+                <select class="format-select">
+                    <option>Arial</option>
+                    <option>Times New Roman</option>
+                    <option>Courier New</option>
+                    <option>Georgia</option>
+                    <option>Verdana</option>
+                </select>
+                <select class="format-select">
+                    <option>8</option>
+                    <option>10</option>
+                    <option>12</option>
+                    <option>14</option>
+                    <option selected>16</option>
+                    <option>18</option>
+                    <option>24</option>
+                    <option>32</option>
+                    <option>48</option>
+                </select>
+                <input type="color" class="format-input" value="#ffffff" title="Text Color">
+                <input type="color" class="format-input" value="#4a86e8" title="Highlight Color">
+            </div>
+
+            <div class="editor">
+                <div class="document">
+                    <div class="document-content" contenteditable="true">
+                        <h1>Welcome to NexDoc Editor</h1>
+                        <p>This is a modern document editor with a dark theme. You can create, edit, and view documents in various formats.</p>
+                        <p>Try out the formatting tools above to style your content. You can change fonts, colors, alignment, and more.</p>
+                        <h2>Features</h2>
+                        <ul>
+                            <li>Support for multiple document formats</li>
+                            <li>Advanced formatting options</li>
+                            <li>Formulas and functions</li>
+                            <li>Upload and download capabilities</li>
+                            <li>Printing support</li>
+                        </ul>
+                        <h2>Getting Started</h2>
+                        <p>Start typing to create your document. Use the toolbar buttons to format your content.</p>
+                        <p>You can insert images, tables, and links using the insert options.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div>Page 1 of 1</div>
+        <div>Words: 102</div>
+        <div>100%</div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Upload Document</div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Select a document to upload:</p>
+                <input type="file" class="modal-input">
+                <p>Supported formats: DOC, DOCX, PDF, TXT, RTF</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary">Cancel</button>
+                <button class="modal-btn modal-btn-primary">Upload</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        function format(command, value) {
-            document.execCommand(command, false, value);
+        // Modal functionality
+        const uploadBtn = document.querySelector('[title="Upload"]');
+        const uploadModal = document.getElementById('uploadModal');
+        const closeModal = document.querySelector('.modal-close');
+        const cancelBtn = document.querySelector('.modal-btn-secondary');
+
+        uploadBtn.addEventListener('click', () => {
+            uploadModal.classList.add('active');
+        });
+
+        const closeModalFunc = () => {
+            uploadModal.classList.remove('active');
+        };
+
+        closeModal.addEventListener('click', closeModalFunc);
+        cancelBtn.addEventListener('click', closeModalFunc);
+
+        // Tool buttons functionality
+        const toolBtns = document.querySelectorAll('.tool-btn');
+        toolBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons in the same group
+                const group = btn.closest('.tool-group');
+                group.querySelectorAll('.tool-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                
+                // Add active class to clicked button
+                btn.classList.add('active');
+                
+                // Handle specific actions
+                if (btn.title === 'Upload') {
+                    uploadModal.classList.add('active');
+                } else if (btn.title === 'Print') {
+                    window.print();
+                }
+            });
+        });
+
+        // Formatting functionality
+        const boldBtn = document.querySelector('[title="Bold"]');
+        const italicBtn = document.querySelector('[title="Italic"]');
+        const underlineBtn = document.querySelector('[title="Underline"]');
+        const documentContent = document.querySelector('.document-content');
+
+        boldBtn.addEventListener('click', () => {
+            document.execCommand('bold', false, null);
+        });
+
+        italicBtn.addEventListener('click', () => {
+            document.execCommand('italic', false, null);
+        });
+
+        underlineBtn.addEventListener('click', () => {
+            document.execCommand('underline', false, null);
+        });
+
+        // Update word count
+        function updateWordCount() {
+            const text = documentContent.textContent;
+            const wordCount = text.trim().split(/\s+/).length;
+            document.querySelector('.status-bar').lastElementChild.textContent = `Words: ${wordCount}`;
         }
 
-        function setUrl() {
-            var url = document.getElementById('txtFormatUrl').value;
-            var sText = document.getSelection();
-            if (sText.toString()) {
-                document.execCommand('insertHTML', false, '<a href="' + url + '" target="_blank">' + sText + '</a>');
-            }
-            document.getElementById('txtFormatUrl').value = '';
-        }
-
-        function newDoc() {
-            document.getElementById('editor').innerHTML = '';
-            document.getElementById('viewer').style.display = 'none';
-            document.getElementById('editor').style.display = 'block';
-        }
-
-        function loadFile() {
-            const file = document.getElementById('upload').files[0];
-            if (!file) return;
-            const ext = file.name.split('.').pop().toLowerCase();
-            const reader = new FileReader();
-
-            if (ext === 'pdf') {
-                reader.onload = function(e) {
-                    const arrayBuffer = e.target.result;
-                    const uint8Array = new Uint8Array(arrayBuffer);
-                    let binaryString = '';
-                    for (let i = 0; i < uint8Array.length; i++) {
-                        binaryString += String.fromCharCode(uint8Array[i]);
-                    }
-                    const base64 = btoa(binaryString);
-                    document.getElementById('viewer').src = 'data:application/pdf;base64,' + base64;
-                    document.getElementById('viewer').style.display = 'block';
-                    document.getElementById('editor').style.display = 'none';
-                };
-                reader.readAsArrayBuffer(file);
-            } else if (ext === 'txt' || ext === 'html') {
-                reader.onload = function(e) {
-                    document.getElementById('editor').innerHTML = e.target.result;
-                    document.getElementById('viewer').style.display = 'none';
-                    document.getElementById('editor').style.display = 'block';
-                };
-                reader.readAsText(file);
-            } else {
-                alert('Unsupported file format. Supported: txt, html for editing; pdf for viewing.');
-            }
-        }
-
-        function saveFile() {
-            const fmt = document.getElementById('saveFormat').value;
-            let content, type, ext;
-            if (fmt === 'txt') {
-                content = document.getElementById('editor').innerText;
-                type = 'text/plain';
-                ext = 'txt';
-            } else if (fmt === 'html') {
-                content = document.getElementById('editor').innerHTML;
-                type = 'text/html';
-                ext = 'html';
-            }
-            const blob = new Blob([content], { type: type });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'document.' + ext;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function exportToPDF() {
-            printDoc(); // Uses browser's print to PDF feature
-        }
-
-        function printDoc() {
-            window.print();
-        }
+        documentContent.addEventListener('input', updateWordCount);
+        updateWordCount();
     </script>
 </body>
 </html>
