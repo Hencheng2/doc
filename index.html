@@ -149,6 +149,11 @@
             border-color: var(--accent);
         }
         
+        .tool-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        
         .editor-area {
             display: flex;
             height: 500px;
@@ -173,11 +178,16 @@
         
         #spreadsheet-editor {
             padding: 0;
+            overflow: auto;
+        }
+        
+        .sheet-container {
+            min-width: 800px;
         }
         
         .sheet-grid {
             display: grid;
-            grid-template-columns: 50px repeat(10, 1fr);
+            grid-template-columns: 50px repeat(10, 100px);
             border: 1px solid var(--border);
             background: var(--bg-secondary);
         }
@@ -189,12 +199,21 @@
             outline: none;
             background: var(--bg-secondary);
             color: var(--text-primary);
+            position: relative;
         }
         
         .cell.header {
             background: var(--bg-tertiary);
             font-weight: bold;
             text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        
+        .cell.selected {
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
         }
         
         #slides-editor {
@@ -203,6 +222,7 @@
             align-items: center;
             justify-content: center;
             background: var(--bg-secondary);
+            padding: 20px;
         }
         
         .slide-container {
@@ -213,18 +233,23 @@
             border-radius: 8px;
             padding: 30px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
         .slide-title {
             font-size: 32px;
             margin-bottom: 20px;
             color: var(--text-primary);
+            outline: none;
         }
         
         .slide-content {
             font-size: 18px;
             line-height: 1.6;
             color: var(--text-secondary);
+            outline: none;
         }
         
         .slide-nav {
@@ -429,6 +454,20 @@
             --border: #cccccc;
         }
         
+        .font-selector {
+            width: 120px;
+        }
+        
+        .font-size-selector {
+            width: 60px;
+        }
+        
+        .color-selector {
+            width: 40px;
+            height: 30px;
+            padding: 2px;
+        }
+        
         @media (max-width: 768px) {
             .toolbar {
                 flex-direction: column;
@@ -476,7 +515,7 @@
                 <button class="btn" id="save-btn">
                     <i class="fas fa-save"></i> Save
                 </button>
-                <input type="file" id="file-upload" class="file-upload" accept=".docx,.xlsx,.pptx,.txt,.csv">
+                <input type="file" id="file-upload" class="file-upload" accept=".docx,.xlsx,.pptx,.txt,.csv,.json">
             </div>
         </header>
         
@@ -494,102 +533,74 @@
         
         <div class="toolbar">
             <div class="tool-group">
-                <button class="tool-btn"><i class="fas fa-save"></i> Save</button>
-                <button class="tool-btn"><i class="fas fa-file-export"></i> Export</button>
-                <button class="tool-btn"><i class="fas fa-print"></i> Print</button>
+                <button class="tool-btn" id="save-tool"><i class="fas fa-save"></i> Save</button>
+                <button class="tool-btn" id="export-btn"><i class="fas fa-file-export"></i> Export</button>
+                <button class="tool-btn" id="print-btn"><i class="fas fa-print"></i> Print</button>
             </div>
             <div class="tool-group">
-                <button class="tool-btn"><i class="fas fa-bold"></i></button>
-                <button class="tool-btn"><i class="fas fa-italic"></i></button>
-                <button class="tool-btn"><i class="fas fa-underline"></i></button>
-                <button class="tool-btn"><i class="fas fa-font"></i></button>
+                <select class="tool-btn font-selector" id="font-selector">
+                    <option>Arial</option>
+                    <option>Times New Roman</option>
+                    <option>Courier New</option>
+                    <option>Georgia</option>
+                    <option>Verdana</option>
+                </select>
+                <select class="tool-btn font-size-selector" id="font-size-selector">
+                    <option>8</option>
+                    <option>10</option>
+                    <option>12</option>
+                    <option>14</option>
+                    <option>18</option>
+                    <option>24</option>
+                    <option>32</option>
+                </select>
+                <button class="tool-btn" id="bold-btn"><i class="fas fa-bold"></i></button>
+                <button class="tool-btn" id="italic-btn"><i class="fas fa-italic"></i></button>
+                <button class="tool-btn" id="underline-btn"><i class="fas fa-underline"></i></button>
+                <input type="color" class="color-selector" id="color-selector" value="#ffffff">
             </div>
             <div class="tool-group">
-                <button class="tool-btn"><i class="fas fa-align-left"></i></button>
-                <button class="tool-btn"><i class="fas fa-align-center"></i></button>
-                <button class="tool-btn"><i class="fas fa-align-right"></i></button>
-                <button class="tool-btn"><i class="fas fa-list-ul"></i></button>
-                <button class="tool-btn"><i class="fas fa-list-ol"></i></button>
+                <button class="tool-btn" id="align-left-btn"><i class="fas fa-align-left"></i></button>
+                <button class="tool-btn" id="align-center-btn"><i class="fas fa-align-center"></i></button>
+                <button class="tool-btn" id="align-right-btn"><i class="fas fa-align-right"></i></button>
+                <button class="tool-btn" id="justify-btn"><i class="fas fa-align-justify"></i></button>
+                <button class="tool-btn" id="list-ul-btn"><i class="fas fa-list-ul"></i></button>
+                <button class="tool-btn" id="list-ol-btn"><i class="fas fa-list-ol"></i></button>
             </div>
             <div class="tool-group">
-                <button class="tool-btn"><i class="fas fa-image"></i> Image</button>
-                <button class="tool-btn"><i class="fas fa-table"></i> Table</button>
-                <button class="tool-btn"><i class="fas fa-chart-bar"></i> Chart</button>
-                <button class="tool-btn"><i class="fas fa-link"></i> Link</button>
+                <button class="tool-btn" id="insert-image-btn"><i class="fas fa-image"></i> Image</button>
+                <button class="tool-btn" id="insert-table-btn"><i class="fas fa-table"></i> Table</button>
+                <button class="tool-btn" id="insert-chart-btn"><i class="fas fa-chart-bar"></i> Chart</button>
+                <button class="tool-btn" id="insert-link-btn"><i class="fas fa-link"></i> Link</button>
             </div>
             <div class="tool-group">
-                <button class="tool-btn"><i class="fas fa-undo"></i></button>
-                <button class="tool-btn"><i class="fas fa-redo"></i></button>
+                <button class="tool-btn" id="undo-btn"><i class="fas fa-undo"></i></button>
+                <button class="tool-btn" id="redo-btn"><i class="fas fa-redo"></i></button>
+                <button class="tool-btn" id="find-btn"><i class="fas fa-search"></i> Find</button>
             </div>
         </div>
         
         <div class="editor-area">
-            <div id="word-editor" class="editor active">
-                <h1 contenteditable="true">Welcome to UniDoc Suite</h1>
-                <p contenteditable="true">This is a unified document editor that combines the functionality of word processing, spreadsheets, and presentations in a single application.</p>
+            <div id="word-editor" class="editor active" contenteditable="true">
+                <h1>Welcome to UniDoc Suite</h1>
+                <p>This is a unified document editor that combines the functionality of word processing, spreadsheets, and presentations in a single application.</p>
                 
                 <div class="content-area">
-                    <p contenteditable="true">Try editing this text. You can format content using the toolbar above.</p>
-                    <p contenteditable="true">Create professional documents, analyze data, and design presentations - all in one place.</p>
+                    <p>Try editing this text. You can format content using the toolbar above.</p>
+                    <p>Create professional documents, analyze data, and design presentations - all in one place.</p>
                 </div>
-                
-                <button class="btn"><i class="fas fa-plus"></i> Add New Page</button>
             </div>
             
             <div id="spreadsheet-editor" class="editor">
-                <div class="sheet-grid">
-                    <div class="cell header"></div>
-                    <div class="cell header">A</div>
-                    <div class="cell header">B</div>
-                    <div class="cell header">C</div>
-                    <div class="cell header">D</div>
-                    <div class="cell header">E</div>
-                    <div class="cell header">F</div>
-                    <div class="cell header">G</div>
-                    <div class="cell header">H</div>
-                    <div class="cell header">I</div>
-                    <div class="cell header">J</div>
-                    
-                    <div class="cell header">1</div>
-                    <div class="cell" contenteditable="true">Q1 Sales</div>
-                    <div class="cell" contenteditable="true">Q2 Sales</div>
-                    <div class="cell" contenteditable="true">Q3 Sales</div>
-                    <div class="cell" contenteditable="true">Q4 Sales</div>
-                    <div class="cell" contenteditable="true">Total</div>
-                    <div class="cell" contenteditable="true">Growth</div>
-                    <div class="cell" contenteditable="true"></div>
-                    <div class="cell" contenteditable="true"></div>
-                    <div class="cell" contenteditable="true"></div>
-                    <div class="cell" contenteditable="true"></div>
-                    
-                    <div class="cell header">2</div>
-                    <div class="cell" contenteditable="true">12500</div>
-                    <div class="cell" contenteditable="true">14200</div>
-                    <div class="cell" contenteditable="true">13800</div>
-                    <div class="cell" contenteditable="true">16700</div>
-                    <div class="cell" contenteditable="true">=SUM(B2:E2)</div>
-                    <div class="cell" contenteditable="true">=((E2-B2)/B2)</div>
-                    <div class="cell" contenteditable="true"></div>
-                    <div class="cell" contenteditable="true"></div>
-                    <div class="cell" contenteditable="true"></div>
-                    <div class="cell" contenteditable="true"></div>
-                    
-                    <div class="cell header">3</div>
-                    <div class="cell" contenteditable="true">Product A</div>
-                    <div class="cell" contenteditable="true">9800</div>
-                    <div class="cell" contenteditable="true">10200</div>
-                    <div class="cell" contenteditable="true">11500</div>
-                    <div class="cell" contenteditable="true">12000</div>
-                    <div class="cell" contenteditable="true">=SUM(B3:E3)</div>
-                    <div class="cell" contenteditable="true"></div>
-                    <div class="cell" contenteditable="true"></div>
-                    <div class="cell" contenteditable="true"></div>
-                    <div class="cell" contenteditable="true"></div>
+                <div class="sheet-container">
+                    <div class="sheet-grid" id="spreadsheet-grid">
+                        <!-- Generated by JavaScript -->
+                    </div>
                 </div>
             </div>
             
             <div id="slides-editor" class="editor">
-                <div class="slide-container">
+                <div class="slide-container" id="slide-container">
                     <h1 class="slide-title" contenteditable="true">Unified Presentation</h1>
                     <div class="slide-content" contenteditable="true">
                         <p>Create beautiful presentations with integrated content from documents and spreadsheets.</p>
@@ -597,48 +608,19 @@
                     </div>
                 </div>
                 <div class="slide-nav">
-                    <button class="btn"><i class="fas fa-chevron-left"></i> Previous</button>
-                    <button class="btn">Next <i class="fas fa-chevron-right"></i></button>
+                    <button class="btn" id="prev-slide"><i class="fas fa-chevron-left"></i> Previous</button>
+                    <span id="slide-number">Slide 1 of 1</span>
+                    <button class="btn" id="next-slide">Next <i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
         </div>
         
         <div class="status-bar">
-            <div class="page-info">Page 1 of 1 | Words: 42</div>
+            <div class="page-info">Words: <span id="word-count">0</span> | Pages: <span id="page-count">1</span></div>
             <div class="zoom-controls">
-                <button class="zoom-btn"><i class="fas fa-search-minus"></i></button>
-                <span>100%</span>
-                <button class="zoom-btn"><i class="fas fa-search-plus"></i></button>
-            </div>
-        </div>
-    </div>
-
-    <div class="recent-files">
-        <h3>Recent Files</h3>
-        <div class="file-list">
-            <div class="file-item">
-                <div class="file-icon">
-                    <i class="fas fa-file-word"></i>
-                </div>
-                <div class="file-name">Annual Report.docx</div>
-            </div>
-            <div class="file-item">
-                <div class="file-icon">
-                    <i class="fas fa-table"></i>
-                </div>
-                <div class="file-name">Financials.xlsx</div>
-            </div>
-            <div class="file-item">
-                <div class="file-icon">
-                    <i class="fas fa-presentation-screen"></i>
-                </div>
-                <div class="file-name">Investor Deck.pptx</div>
-            </div>
-            <div class="file-item">
-                <div class="file-icon">
-                    <i class="fas fa-file-word"></i>
-                </div>
-                <div class="file-name">Project Plan.docx</div>
+                <button class="zoom-btn" id="zoom-out"><i class="fas fa-search-minus"></i></button>
+                <span id="zoom-level">100%</span>
+                <button class="zoom-btn" id="zoom-in"><i class="fas fa-search-plus"></i></button>
             </div>
         </div>
     </div>
@@ -651,7 +633,7 @@
             </div>
             <div class="form-group">
                 <label>Select File Type</label>
-                <select class="form-control">
+                <select class="form-control" id="file-type-selector">
                     <option>All Supported Formats</option>
                     <option>Word Documents (.docx)</option>
                     <option>Excel Spreadsheets (.xlsx)</option>
@@ -661,7 +643,7 @@
             </div>
             <div class="form-group">
                 <label>From Location</label>
-                <select class="form-control">
+                <select class="form-control" id="file-location-selector">
                     <option>My Computer</option>
                     <option>OneDrive</option>
                     <option>Google Drive</option>
@@ -669,7 +651,7 @@
                 </select>
             </div>
             <div class="form-group">
-                <button class="btn" style="width: 100%">
+                <button class="btn" id="browse-files-btn" style="width: 100%">
                     <i class="fas fa-folder-open"></i> Browse Files
                 </button>
             </div>
@@ -678,148 +660,286 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Tab switching functionality
-            const tabs = document.querySelectorAll('.tab');
-            const editors = document.querySelectorAll('.editor');
+            // Initialize the application
+            initApp();
             
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const target = tab.getAttribute('data-target');
+            function initApp() {
+                // Initialize editors
+                initWordProcessor();
+                initSpreadsheet();
+                initSlides();
+                
+                // Set up event listeners
+                setupEventListeners();
+                
+                // Update word count
+                updateWordCount();
+            }
+            
+            function initWordProcessor() {
+                // Set default content if empty
+                const wordEditor = document.getElementById('word-editor');
+                if (wordEditor.innerHTML.trim() === '') {
+                    wordEditor.innerHTML = `
+                        <h1>Welcome to UniDoc Suite</h1>
+                        <p>This is a unified document editor that combines the functionality of word processing, spreadsheets, and presentations in a single application.</p>
+                        <p>Try editing this text. You can format content using the toolbar above.</p>
+                        <p>Create professional documents, analyze data, and design presentations - all in one place.</p>
+                    `;
+                }
+            }
+            
+            function initSpreadsheet() {
+                const grid = document.getElementById('spreadsheet-grid');
+                grid.innerHTML = '';
+                
+                // Create header row
+                let headerRow = document.createElement('div');
+                headerRow.classList.add('cell', 'header');
+                headerRow.textContent = '';
+                grid.appendChild(headerRow);
+                
+                for (let i = 0; i < 10; i++) {
+                    let headerCell = document.createElement('div');
+                    headerCell.classList.add('cell', 'header');
+                    headerCell.textContent = String.fromCharCode(65 + i);
+                    grid.appendChild(headerCell);
+                }
+                
+                // Create data rows
+                for (let row = 1; row <= 15; row++) {
+                    // Row number header
+                    let rowHeader = document.createElement('div');
+                    rowHeader.classList.add('cell', 'header');
+                    rowHeader.textContent = row;
+                    grid.appendChild(rowHeader);
                     
-                    // Update active tab
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    
-                    // Show active editor
-                    editors.forEach(editor => {
-                        editor.classList.remove('active');
-                        if (editor.id === target) {
-                            editor.classList.add('active');
-                        }
+                    // Data cells
+                    for (let col = 0; col < 10; col++) {
+                        let cell = document.createElement('div');
+                        cell.classList.add('cell');
+                        cell.setAttribute('contenteditable', 'true');
+                        cell.setAttribute('data-row', row);
+                        cell.setAttribute('data-col', col);
+                        grid.appendChild(cell);
+                    }
+                }
+            }
+            
+            function initSlides() {
+                // Currently just one slide as a simple example
+                // In a full implementation, you would have multiple slides
+            }
+            
+            function setupEventListeners() {
+                // Tab switching functionality
+                const tabs = document.querySelectorAll('.tab');
+                const editors = document.querySelectorAll('.editor');
+                
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const target = tab.getAttribute('data-target');
+                        
+                        // Update active tab
+                        tabs.forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        
+                        // Show active editor
+                        editors.forEach(editor => {
+                            editor.classList.remove('active');
+                            if (editor.id === target) {
+                                editor.classList.add('active');
+                                
+                                // Update status bar based on active editor
+                                if (target === 'word-editor') {
+                                    updateWordCount();
+                                }
+                            }
+                        });
                     });
                 });
-            });
-            
-            // Theme toggle functionality
-            const themeToggle = document.getElementById('theme-toggle');
-            const themeIcon = themeToggle.querySelector('i');
-            
-            themeToggle.addEventListener('click', () => {
-                document.body.classList.toggle('light-theme');
-                if (document.body.classList.contains('light-theme')) {
-                    themeIcon.classList.remove('fa-moon');
-                    themeIcon.classList.add('fa-sun');
-                } else {
-                    themeIcon.classList.remove('fa-sun');
-                    themeIcon.classList.add('fa-moon');
-                }
-            });
-            
-            // Open modal functionality
-            const openBtn = document.getElementById('open-btn');
-            const openModal = document.getElementById('open-modal');
-            const closeModal = document.querySelector('.close-modal');
-            
-            openBtn.addEventListener('click', () => {
-                openModal.style.display = 'flex';
-            });
-            
-            closeModal.addEventListener('click', () => {
-                openModal.style.display = 'none';
-            });
-            
-            // File upload functionality
-            const fileUpload = document.getElementById('file-upload');
-            const uploadBtn = document.querySelector('.upload-btn');
-            
-            uploadBtn.addEventListener('click', () => {
-                fileUpload.click();
-            });
-            
-            fileUpload.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    alert(`Selected file: ${e.target.files[0].name}`);
-                    // Here you would handle the file upload process
-                }
-            });
-            
-            // Simulate spreadsheet formulas (simplified)
-            const cells = document.querySelectorAll('.cell[contenteditable="true"]');
-            cells.forEach(cell => {
-                cell.addEventListener('blur', () => {
-                    if (cell.textContent.startsWith('=')) {
-                        // Very simple formula simulation
-                        const formula = cell.textContent.substring(1);
-                        if (formula === 'SUM(B2:E2)') {
-                            // Calculate the sum of B2 to E2
-                            let sum = 0;
-                            for (let i = 1; i <= 4; i++) {
-                                const cellValue = document.querySelector(`.sheet-grid div:nth-child(${12 + i})`).textContent;
-                                sum += parseInt(cellValue) || 0;
-                            }
-                            cell.textContent = sum;
-                        } else if (formula === '((E2-B2)/B2)') {
-                            const b2 = parseInt(document.querySelector('.sheet-grid div:nth-child(13)').textContent) || 0;
-                            const e2 = parseInt(document.querySelector('.sheet-grid div:nth-child(16)').textContent) || 0;
-                            const growth = ((e2 - b2) / b2 * 100).toFixed(2);
-                            cell.textContent = growth + '%';
-                        } else if (formula === 'SUM(B3:E3)') {
-                            let sum = 0;
-                            for (let i = 1; i <= 4; i++) {
-                                const cellValue = document.querySelector(`.sheet-grid div:nth-child(${23 + i})`).textContent;
-                                sum += parseInt(cellValue) || 0;
-                            }
-                            cell.textContent = sum;
-                        }
+                
+                // Theme toggle functionality
+                const themeToggle = document.getElementById('theme-toggle');
+                const themeIcon = themeToggle.querySelector('i');
+                
+                themeToggle.addEventListener('click', () => {
+                    document.body.classList.toggle('light-theme');
+                    if (document.body.classList.contains('light-theme')) {
+                        themeIcon.classList.remove('fa-moon');
+                        themeIcon.classList.add('fa-sun');
+                    } else {
+                        themeIcon.classList.remove('fa-sun');
+                        themeIcon.classList.add('fa-moon');
                     }
                 });
-            });
+                
+                // Formatting buttons
+                document.getElementById('bold-btn').addEventListener('click', () => {
+                    document.execCommand('bold', false, null);
+                });
+                
+                document.getElementById('italic-btn').addEventListener('click', () => {
+                    document.execCommand('italic', false, null);
+                });
+                
+                document.getElementById('underline-btn').addEventListener('click', () => {
+                    document.execCommand('underline', false, null);
+                });
+                
+                document.getElementById('align-left-btn').addEventListener('click', () => {
+                    document.execCommand('justifyLeft', false, null);
+                });
+                
+                document.getElementById('align-center-btn').addEventListener('click', () => {
+                    document.execCommand('justifyCenter', false, null);
+                });
+                
+                document.getElementById('align-right-btn').addEventListener('click', () => {
+                    document.execCommand('justifyRight', false, null);
+                });
+                
+                document.getElementById('justify-btn').addEventListener('click', () => {
+                    document.execCommand('justifyFull', false, null);
+                });
+                
+                document.getElementById('list-ul-btn').addEventListener('click', () => {
+                    document.execCommand('insertUnorderedList', false, null);
+                });
+                
+                document.getElementById('list-ol-btn').addEventListener('click', () => {
+                    document.execCommand('insertOrderedList', false, null);
+                });
+                
+                // Font and color selectors
+                document.getElementById('font-selector').addEventListener('change', function() {
+                    document.execCommand('fontName', false, this.value);
+                });
+                
+                document.getElementById('font-size-selector').addEventListener('change', function() {
+                    document.execCommand('fontSize', false, this.value);
+                });
+                
+                document.getElementById('color-selector').addEventListener('change', function() {
+                    document.execCommand('foreColor', false, this.value);
+                });
+                
+                // Word count update
+                document.getElementById('word-editor').addEventListener('input', updateWordCount);
+                
+                // Zoom functionality
+                let currentZoom = 100;
+                document.getElementById('zoom-in').addEventListener('click', () => {
+                    if (currentZoom < 150) {
+                        currentZoom += 10;
+                        updateZoomLevel();
+                    }
+                });
+                
+                document.getElementById('zoom-out').addEventListener('click', () => {
+                    if (currentZoom > 50) {
+                        currentZoom -= 10;
+                        updateZoomLevel();
+                    }
+                });
+                
+                // New document
+                document.getElementById('new-btn').addEventListener('click', () => {
+                    if (confirm('Create a new document? Any unsaved changes will be lost.')) {
+                        const activeEditor = document.querySelector('.editor.active');
+                        if (activeEditor.id === 'word-editor') {
+                            activeEditor.innerHTML = '<h1>New Document</h1><p>Start typing here...</p>';
+                        } else if (activeEditor.id === 'spreadsheet-editor') {
+                            initSpreadsheet();
+                        } else if (activeEditor.id === 'slides-editor') {
+                            activeEditor.querySelector('.slide-title').textContent = 'New Presentation';
+                            activeEditor.querySelector('.slide-content').innerHTML = '<p>Add your content here</p>';
+                        }
+                        updateWordCount();
+                    }
+                });
+                
+                // Save document
+                document.getElementById('save-btn').addEventListener('click', saveDocument);
+                document.getElementById('save-tool').addEventListener('click', saveDocument);
+                
+                // Open modal
+                document.getElementById('open-btn').addEventListener('click', () => {
+                    document.getElementById('open-modal').style.display = 'flex';
+                });
+                
+                document.querySelector('.close-modal').addEventListener('click', () => {
+                    document.getElementById('open-modal').style.display = 'none';
+                });
+                
+                // Browse files button
+                document.getElementById('browse-files-btn').addEventListener('click', () => {
+                    document.getElementById('file-upload').click();
+                });
+                
+                // File upload
+                document.getElementById('file-upload').addEventListener('change', handleFileUpload);
+                
+                // Print
+                document.getElementById('print-btn').addEventListener('click', () => {
+                    window.print();
+                });
+            }
             
-            // Add basic formatting buttons functionality
-            const boldBtn = document.querySelectorAll('.tool-btn')[3];
-            const italicBtn = document.querySelectorAll('.tool-btn')[4];
-            const underlineBtn = document.querySelectorAll('.tool-btn')[5];
+            function updateWordCount() {
+                const text = document.getElementById('word-editor').innerText;
+                const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+                document.getElementById('word-count').textContent = wordCount;
+                
+                // Simple page count estimation (assuming ~500 words per page)
+                const pageCount = Math.max(1, Math.ceil(wordCount / 500));
+                document.getElementById('page-count').textContent = pageCount;
+            }
             
-            boldBtn.addEventListener('click', () => {
-                document.execCommand('bold', false, null);
-            });
+            function updateZoomLevel() {
+                document.getElementById('zoom-level').textContent = currentZoom + '%';
+                // In a real application, you would adjust the zoom level here
+            }
             
-            italicBtn.addEventListener('click', () => {
-                document.execCommand('italic', false, null);
-            });
-            
-            underlineBtn.addEventListener('click', () => {
-                document.execCommand('underline', false, null);
-            });
-            
-            // Zoom functionality
-            const zoomInBtn = document.querySelectorAll('.zoom-btn')[1];
-            const zoomOutBtn = document.querySelectorAll('.zoom-btn')[0];
-            const zoomLevel = document.querySelector('.zoom-controls span');
-            
-            let currentZoom = 100;
-            
-            zoomInBtn.addEventListener('click', () => {
-                if (currentZoom < 150) {
-                    currentZoom += 10;
-                    zoomLevel.textContent = currentZoom + '%';
-                    document.querySelectorAll('.editor').forEach(editor => {
-                        editor.style.transform = `scale(${currentZoom/100})`;
-                        editor.style.transformOrigin = 'top left';
-                    });
+            function saveDocument() {
+                const activeEditor = document.querySelector('.editor.active');
+                let content = '';
+                
+                if (activeEditor.id === 'word-editor') {
+                    content = activeEditor.innerHTML;
+                } else if (activeEditor.id === 'spreadsheet-editor') {
+                    // In a real application, you would serialize the spreadsheet data
+                    content = 'Spreadsheet data would be saved here';
+                } else if (activeEditor.id === 'slides-editor') {
+                    content = activeEditor.innerHTML;
                 }
-            });
+                
+                // Create a blob and download link
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'document.uni';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                alert('Document saved successfully!');
+            }
             
-            zoomOutBtn.addEventListener('click', () => {
-                if (currentZoom > 50) {
-                    currentZoom -= 10;
-                    zoomLevel.textContent = currentZoom + '%';
-                    document.querySelectorAll('.editor').forEach(editor => {
-                        editor.style.transform = `scale(${currentZoom/100})`;
-                        editor.style.transformOrigin = 'top left';
-                    });
+            function handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // In a real application, you would process the file content
+                        alert(`File "${file.name}" loaded successfully!`);
+                        document.getElementById('open-modal').style.display = 'none';
+                    };
+                    reader.readAsText(file);
                 }
-            });
+            }
         });
     </script>
 </body>
